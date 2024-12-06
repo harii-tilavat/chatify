@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const { userLoginValidationSchema, userRegisterValidationSchema } = require("./userValidation");
+const { userLoginValidationSchema, userRegisterValidationSchema } = require("./auth.validation");
 const { AppError } = require("../middlewares/errorHandlerMiddleware");
 const { StatusCode } = require("../utils/response");
 

@@ -1,19 +1,16 @@
-const express = require("express");
-const cors = require('cors');
+const app = require("./src/app");
 const dotenv = require("dotenv");
+const { connectDB } = require("./src/config/db.config");
 
+// Load environment variables
 dotenv.config();
 
-const app = express();
-
-// Middlewares
-app.use(cors());
-
-app.use("/api", require("./src/routes"));
-
+// Define the port
 const PORT = process.env.PORT || 8080;
 
+// Start the server
+
 app.listen(PORT, () => {
-    console.log("Server running at PORT: ", PORT);
+    console.log(`Server is running on http://localhost:${PORT}`);
+    connectDB();
 });
-module.exports = app;
