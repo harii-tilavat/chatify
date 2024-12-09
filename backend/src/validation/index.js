@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
 const { userLoginValidationSchema, userRegisterValidationSchema } = require("./auth.validation");
-const { AppError } = require("../middlewares/errorHandlerMiddleware");
+const { AppError } = require("../middlewares/error-handler.midllerware");
 const { StatusCode } = require("../utils/response");
 
 

@@ -1,12 +1,13 @@
+const prisma = require("../config/prismaClient");
+
 class AuthRepo {
     async register(user) {
         try {
-            const { id, username, email, password } = user;
+            const { fullName, email, password } = user;
             // Create a new user record in the database.
             const newUser = await prisma.user.create({
                 data: {
-                    id,
-                    username,
+                    fullName,
                     password,
                     email
                 }

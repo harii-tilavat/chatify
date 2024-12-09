@@ -1,8 +1,8 @@
 
 const CryptoUtils = require("../utils/cryptoUtils");
-const { AppError } = require("../middlewares/errorHandlerMiddleware");
+const { AppError } = require("../middlewares/error-handler.midllerware");
 const { StatusCode, Message } = require("../utils/response");
-const { UserModel } = require("../models/userModel");
+const { UserModel } = require("../models/user.model");
 const JwtHelpwer = require("../utils/jwtHelper");
 const AuthRepo = require("../repositories/auth.repo");
 
@@ -22,7 +22,8 @@ class AuthService {
             const currentUser = { ...user, password: hashPassword };
 
             // Register the user in the database.
-            return await this.authRepo.register(currentUser);
+            await this.authRepo.register(currentUser);
+            return await this.loginUser(user.email, user.password);
         } catch (error) {
             throw error;
         }
