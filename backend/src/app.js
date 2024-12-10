@@ -9,7 +9,10 @@ const { errorHandlerMiddleware } = require("./middlewares/error-handler.midllerw
 const app = express();
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors({
+    origin: 'http://localhost:5174', // Your React app's origin
+    credentials: true, // Allow credentials like cookies
+})); // Enable Cross-Origin Resource Sharing
 app.use(bodyParser.json()); // Parse JSON request bodies
 app.use(cookieParser()); // Parse JSON request bodies
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded data

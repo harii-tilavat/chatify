@@ -1,20 +1,20 @@
 import React from "react";
-import { useModal } from "./ModalContext";
+import { useModal } from "../context/ModalContext";
 
 const Modal: React.FC = () => {
   const { modalOptions, closeModal } = useModal();
 
   if (!modalOptions) return null;
 
-  const { id, title, description, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm } = modalOptions;
+  const {  title, description, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm } = modalOptions;
 
   return (
-    <dialog id={id} className="modal">
+    <div className="modal modal-open">
       <div className="modal-box">
         <h3 className="font-bold text-lg">{title}</h3>
         <p className="py-4">{description}</p>
         <div className="modal-action">
-          <button className="btn btn-secondary" onClick={closeModal}>
+          <button className="btn" onClick={closeModal}>
             {cancelLabel}
           </button>
           {onConfirm && (
@@ -22,7 +22,7 @@ const Modal: React.FC = () => {
               className="btn btn-primary"
               onClick={() => {
                 onConfirm();
-                closeModal();
+                closeModal(); // Close modal after confirm
               }}
             >
               {confirmLabel}
@@ -30,7 +30,7 @@ const Modal: React.FC = () => {
           )}
         </div>
       </div>
-    </dialog>
+    </div>
   );
 };
 

@@ -7,7 +7,8 @@ const axiosInstance = axios.create({
     timeout: 60 * 1000,
     headers: {
         "Content-Type": "application/json"
-    }
+    },
+    withCredentials: true,
 });
 
 // Intercept requests to include the Authorization token
@@ -23,9 +24,6 @@ axiosInstance.interceptors.response.use((response) => {
     // Middleware
     return response;
 }, (error: AxiosError) => {
-    if (error) {
-        console.error("ERROR : ", error);
-    }
     return Promise.reject(error)
 });
 

@@ -14,11 +14,23 @@ interface AuthProps {
     logout: () => void,
 }
 
-export const useAuthStore = create<AuthProps>((set) => ({
+export const useAuthStore = create<AuthProps>((set, get) => ({
     isLoading: false,
-    currentUser: null,
-    checkAuth: () => {
-
+    currentUser: JSON.parse(localStorage.getItem("user") || "null"),
+    checkAuth: async () => {
+        set({ isLoading: true });
+        try {
+            if (get().currentUser) {
+                await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/check-auth");
+            }
+        } catch (error) {
+            set({ currentUser: null });
+            localStorage.removeItem("user");
+            handleApiError(error, true);
+            throw error;
+        } finally {
+            set({ isLoading: false });
+        }
     },
     // Handle user Login
     login: async (user: LoginModel) => {
@@ -28,6 +40,7 @@ export const useAuthStore = create<AuthProps>((set) => ({
             const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/login", { email, password });
             const { message, data: userData } = data;
             set({ currentUser: userData?.user, });
+            localStorage.setItem("user", JSON.stringify(userData?.user));
             toast.success(message || "Login success.");
         } catch (error) {
             handleApiError(error);
@@ -54,9 +67,10 @@ export const useAuthStore = create<AuthProps>((set) => ({
     },
     logout: async () => {
         try {
-            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/logout");
+            const { data } = await axiosInstance.post<GenericReponseModel>("/logout");
             const { message } = data;
-            set({ currentUser: null, });
+            set({ currentUser: null });
+            localStorage.removeItem("user");
             toast.success(message || "Logout success.");
         } catch (error) {
             handleApiError(error);

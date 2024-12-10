@@ -5,6 +5,8 @@ import Layout from "../pages/Layout";
 import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
 import SettingsPage from "../pages/SettingPage";
+
+
 const AppRouter = () => {
   return (
     <Routes>

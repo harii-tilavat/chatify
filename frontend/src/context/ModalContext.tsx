@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import Modal from "../components/Modal";
 
 interface ModalOptions {
   id?: string;
@@ -19,6 +20,7 @@ const ModalContext = createContext<ModalContextProps | null>(null);
 
 export const useModal = () => {
   const context = useContext(ModalContext);
+
   if (!context) {
     throw new Error("useModal must be used within a ModalProvider");
   }
@@ -27,18 +29,22 @@ export const useModal = () => {
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modalOptions, setModalOptions] = useState<ModalOptions | null>(null);
+  const [isOpen, setIsOpen] = useState(false); // State to control modal visibility
 
   const openModal = (options: ModalOptions) => {
     setModalOptions(options);
-    (document.getElementById(options.id || "confirmation-modal") as HTMLDialogElement).showModal();
+    setIsOpen(true); // Open the modal by setting state
   };
 
   const closeModal = () => {
-    if (modalOptions?.id) {
-      (document.getElementById(modalOptions?.id || "confirmation-modal") as HTMLDialogElement)?.close();
-    }
-    setModalOptions(null);
+    setIsOpen(false); // Close the modal
+    setModalOptions(null); // Reset modal options
   };
 
-  return <ModalContext.Provider value={{ openModal, closeModal, modalOptions }}>{children}</ModalContext.Provider>;
+  return (
+    <ModalContext.Provider value={{ openModal, closeModal, modalOptions }}>
+      {children}
+      {isOpen && <Modal />}
+    </ModalContext.Provider>
+  );
 };
