@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface LoginFormValues {
   email: string;
@@ -10,19 +11,22 @@ interface LoginFormValues {
 }
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const isLoggingIn = false;
+  const { isLoading, login } = useAuthStore();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormValues>({ defaultValues: { email: "", password: "" } });
 
-  function handleSubmitForm(data: LoginFormValues) {
-    console.log("Data : ", data);
+  function handleSubmitForm(user: LoginFormValues) {
+    login(user);
   }
   return (
     <div className="h-screen grid lg:grid-cols-2">
       {/* Left Side - Form */}
+      <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} isAnimated />
+      
+      {/* Right Side - Image/Pattern */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
@@ -89,8 +93,8 @@ const LoginPage = () => {
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
-              {isLoggingIn ? (
+            <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+              {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Loading...
@@ -111,9 +115,6 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Right Side - Image/Pattern */}
-      <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} isAnimated />
     </div>
   );
 };

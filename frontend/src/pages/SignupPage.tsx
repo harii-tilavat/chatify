@@ -1,8 +1,9 @@
 import AuthImagePattern from "../components/AuthImagePattern";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface SignupFormValues {
   fullName: string;
@@ -11,19 +12,28 @@ interface SignupFormValues {
 }
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const isLoggingIn = false;
+  const { isLoading, signup } = useAuthStore();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignupFormValues>({ defaultValues: { fullName: "", email: "", password: "" } });
 
-  function handleSubmitForm(data: SignupFormValues) {
-    console.log("Data : ", data);
+  async function handleSubmitForm(data: SignupFormValues) {
+    try {
+      await signup(data);
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   }
   return (
     <div className="h-screen grid lg:grid-cols-2">
       {/* Left Side - Form */}
+      <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} />
+
+      {/* Right Side - Image/Pattern */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
@@ -113,8 +123,8 @@ const SignupPage = () => {
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
-              {isLoggingIn ? (
+            <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+              {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Loading...
@@ -135,9 +145,6 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Right Side - Image/Pattern */}
-      <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} />
     </div>
   );
 };
