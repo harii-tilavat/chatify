@@ -1,6 +1,7 @@
 // import { useThemeStore } from "../store/useThemeStore";
 import { Send } from "lucide-react";
 import { THEMES } from "../utils/constants";
+import { useThemeStore } from "../store/useThemeStore";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -8,7 +9,7 @@ const PREVIEW_MESSAGES = [
 ];
 
 const SettingsPage = () => {
-  const { theme, setTheme } = { theme: "", setTheme: (t: string) => {} };
+  const { setTheme } = useThemeStore();
 
   return (
     <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
@@ -19,7 +20,7 @@ const SettingsPage = () => {
         </div>
 
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-          {THEMES.map((t: s) => (
+          {THEMES.map((t: string) => (
             <button
               key={t}
               className={`
