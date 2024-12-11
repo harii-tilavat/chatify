@@ -1,7 +1,7 @@
 import AuthImagePattern from "../components/AuthImagePattern";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -11,13 +11,19 @@ interface LoginFormValues {
 }
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const { isLoading, login } = useAuthStore();
+  const { isLoading, login, currentUser } = useAuthStore();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormValues>({ defaultValues: { email: "", password: "" } });
-
+  useEffect(() => {
+    if (currentUser) {
+      console.log("LOGIN");
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
   function handleSubmitForm(user: LoginFormValues) {
     login(user);
   }
@@ -25,7 +31,7 @@ const LoginPage = () => {
     <div className="h-screen grid lg:grid-cols-2">
       {/* Left Side - Form */}
       <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} isAnimated />
-      
+
       {/* Right Side - Image/Pattern */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
@@ -76,7 +82,7 @@ const LoginPage = () => {
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
+                  className={`input input-bordered w-full pl-10 `}
                   placeholder="••••••••"
                   {...register("password", {
                     required: "Password is required!",

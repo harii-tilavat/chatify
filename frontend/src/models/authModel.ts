@@ -8,6 +8,7 @@ export interface SignupModel {
     password: string;
 }
 export interface UserModel extends SignupModel {
+    id:string;
     profile?: string;
     createdAt?: string;
     updatedAt?: string;
