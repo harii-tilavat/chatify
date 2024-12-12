@@ -1,4 +1,5 @@
-import { Sidebar } from "lucide-react";
+import NoChatSelected from "../components/NoChatSelected";
+import Sidebar from "../components/Sidebar";
 
 const HomePage = () => {
   return (
@@ -7,7 +8,7 @@ const HomePage = () => {
         <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
             <Sidebar />
-            <h2>CHAT CONTAINER</h2>
+            <NoChatSelected />
           </div>
         </div>
       </div>

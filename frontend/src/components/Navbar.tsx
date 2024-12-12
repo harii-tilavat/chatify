@@ -27,7 +27,7 @@ const Navbar = () => {
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
               <h1 className="text-lg font-bold">Chatify</h1>
-              <pre>{JSON.stringify(currentUser)}</pre>
+              {/* <pre>{JSON.stringify(currentUser)}</pre> */}
             </Link>
           </div>
 
