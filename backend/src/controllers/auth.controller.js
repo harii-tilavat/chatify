@@ -28,7 +28,8 @@ class AuthController {
     }
     async checkAuth(req, res, next) {
         try {
-            return await Response.success(res, "Authenication success.");
+            const { userId } = req.user;
+            return await Response.success(res, "Authenication success.", userId);
         } catch (error) {
             next(error);
         }

@@ -18,18 +18,15 @@ export const useAuthStore = create<AuthProps>((set, get) => ({
     isLoading: false,
     currentUser: JSON.parse(localStorage.getItem("user") || "null"),
     checkAuth: async () => {
-        set({ isLoading: true });
         try {
             if (get().currentUser) {
-                await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/check-auth");
+                await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/check-auth");
             }
         } catch (error) {
             set({ currentUser: null });
             localStorage.removeItem("user");
             handleApiError(error, true);
             throw error;
-        } finally {
-            set({ isLoading: false });
         }
     },
     // Handle user Login
@@ -37,7 +34,7 @@ export const useAuthStore = create<AuthProps>((set, get) => ({
         set({ isLoading: true });
         try {
             const { email, password } = user;
-            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/login", { email, password });
+            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/login", { email, password });
             const { message, data: userData } = data;
             set({ currentUser: userData?.user, });
             localStorage.setItem("user", JSON.stringify(userData?.user));
@@ -55,7 +52,7 @@ export const useAuthStore = create<AuthProps>((set, get) => ({
         set({ isLoading: true });
         try {
             const { fullName, email, password } = user;
-            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/register", { fullName, email, password });
+            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/register", { fullName, email, password });
             const { message, data: userData } = data;
             set({ currentUser: userData?.user, });
             toast.success(message || "Sign success.");
@@ -67,7 +64,7 @@ export const useAuthStore = create<AuthProps>((set, get) => ({
     },
     logout: async () => {
         try {
-            const { data } = await axiosInstance.post<GenericReponseModel>("/logout");
+            const { data } = await axiosInstance.post<GenericReponseModel>("/auth/logout");
             const { message } = data;
             set({ currentUser: null });
             localStorage.removeItem("user");

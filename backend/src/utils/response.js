@@ -80,20 +80,6 @@ const Message = Object.freeze({
   SIGNUP_SUCCESS: "Signup successfully.",
   LOGIN_SUCCESS: "Login successfully.",
 
-  // Book related
-  BOOK_CREATED: 'Book added successfully.',
-  BOOK_UPDATED: 'Book updated successfully.',
-  BOOK_DELETED: 'Book deleted successfully.',
-  BOOK_NOT_FOUND: 'Book not found.',
-  BOOKS_NOT_FOUND: 'Books not found.',
-  BOOK_FAILED: 'Books not found.',
-
-  // Review related
-  REVIEW_CREATED: 'Review added successfully.',
-  REVIEW_UPDATED: 'Review updated successfully.',
-  REVIEW_DELETED: 'Review deleted successfully.',
-  REVIEW_NOT_FOUND: 'Review not found.',
-  REVIEWS_NOT_FOUND: 'Reviews not found.',
   // Server
   INTERNAL_SERVER_ERROR: "Something went wrong. Please try again later.",
 });

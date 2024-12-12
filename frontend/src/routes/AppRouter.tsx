@@ -7,6 +7,7 @@ import SignupPage from "../pages/SignupPage";
 import SettingsPage from "../pages/SettingPage";
 import HomePage from "../pages/HomePage";
 import ProtectedRoute from "./ProtectedRoute";
+import ProfilePage from "../pages/ProfilePage";
 
 const AppRouter = () => {
   return (
@@ -23,6 +24,14 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

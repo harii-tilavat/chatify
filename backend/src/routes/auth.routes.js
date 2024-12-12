@@ -16,4 +16,5 @@ router.post("/register", userRegisterValidationSchema, validationHandler, authCo
 router.post("/check-auth", authMiddleware, authController.checkAuth);
 
 router.post("/logout", authController.logout);
+
 module.exports = router;
