@@ -14,12 +14,9 @@ const Layout = () => {
     <main>
       <Navbar />
       <div className="main-content">
-        {/* {true && (
-          <div className="flex items-center justify-center h-screen">
-            <Loader className="size-10 animate-spin" />
-          </div>
-        )} */}
-        <Outlet />
+        <div className="main-container min-h-screen">
+          <Outlet />
+        </div>
       </div>
       {/* <Footer /> */}
     </main>

@@ -5,18 +5,20 @@ import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { toast } from "react-toastify";
 
-interface AuthProps {
+interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
+    onlineUsersId: Array<string>;
     login: (user: LoginModel) => void,
     signup: (user: SignupModel) => void,
     checkAuth: () => void,
     logout: () => void,
 }
 
-export const useAuthStore = create<AuthProps>((set, get) => ({
+export const useAuthStore = create<AuthStoreProps>((set, get) => ({
     isLoading: false,
     currentUser: JSON.parse(localStorage.getItem("user") || "null"),
+    onlineUsersId: [],
     checkAuth: async () => {
         try {
             if (get().currentUser) {

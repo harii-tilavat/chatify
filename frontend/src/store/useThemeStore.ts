@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-interface ThemeProps {
+interface ThemeStoreProps {
     theme: string,
     setTheme: (theme: string) => void
 }
 
-export const useThemeStore = create<ThemeProps>((set) => ({
+export const useThemeStore = create<ThemeStoreProps>((set) => ({
     theme: localStorage.getItem("chat-theme") || "dark",
     setTheme: (theme: string) => {
         localStorage.setItem("chat-theme", theme);
