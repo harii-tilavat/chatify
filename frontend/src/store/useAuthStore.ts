@@ -4,30 +4,36 @@ import axiosInstance from "../utils/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { toast } from "react-toastify";
-
+import { initilizeSocket } from "../lib/socket";
+import { Socket } from "socket.io-client";
 interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
     onlineUsersId: Array<string>;
-    login: (user: LoginModel) => void,
-    signup: (user: SignupModel) => void,
-    checkAuth: () => void,
-    logout: () => void,
+    login: (user: LoginModel) => void;
+    signup: (user: SignupModel) => void;
+    checkAuth: () => void;
+    logout: () => void;
+    socket: Socket | null;
+    connectSocket: () => void;
 }
 
 export const useAuthStore = create<AuthStoreProps>((set, get) => ({
     isLoading: false,
+    socket: null,
     currentUser: JSON.parse(localStorage.getItem("user") || "null"),
     onlineUsersId: [],
     checkAuth: async () => {
         try {
-            if (get().currentUser) {
+            const user = get().currentUser;
+            if (user) {
                 await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/check-auth");
+                get().connectSocket();
             }
         } catch (error) {
             set({ currentUser: null });
             localStorage.removeItem("user");
-            handleApiError(error, true);
+            handleApiError(error);
             throw error;
         }
     },
@@ -41,6 +47,7 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             set({ currentUser: userData?.user, });
             localStorage.setItem("user", JSON.stringify(userData?.user));
             toast.success(message || "Login success.");
+            get().connectSocket();
         } catch (error) {
             handleApiError(error);
             throw error;
@@ -58,6 +65,7 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             const { message, data: userData } = data;
             set({ currentUser: userData?.user, });
             toast.success(message || "Sign success.");
+            get().connectSocket();
         } catch (error) {
             handleApiError(error);
         } finally {
@@ -71,10 +79,24 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             set({ currentUser: null });
             localStorage.removeItem("user");
             toast.success(message || "Logout success.");
+            const currentSocket = get().socket;
+            if (currentSocket) {
+                currentSocket.disconnect();
+            }
         } catch (error) {
             handleApiError(error);
         } finally {
             set({ isLoading: false });
         }
-    }
+    },
+    connectSocket: async () => {
+        const currentSocket = get().socket;
+        if (!currentSocket || !currentSocket.connected) {
+            const currentUser = get().currentUser;
+            if (currentUser) {
+                const socket = initilizeSocket(currentUser);
+                set({ socket });
+            }
+        }
+    },
 }))
