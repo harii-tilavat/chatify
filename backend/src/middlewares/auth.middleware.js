@@ -6,7 +6,7 @@ const authMiddleware = (req, res, next) => {
     try {
         const { authToken } = req.cookies;
         if (!authToken) {
-            throw new AppError(StatusCode.UNAUTHORIZED, Message.TOKEN_MISSING);
+            throw new AppError(StatusCode.UNAUTHORIZED, Message.SESSION_EXPIRED);
         }
         // if (!authorization || !authorization.startsWith('Bearer ')) {
         //     throw new AppError(StatusCode.UNAUTHORIZED, Message.TOKEN_MISSING);
