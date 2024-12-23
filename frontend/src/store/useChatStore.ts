@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { UserModel } from "../models/authModel";
-import axiosInstance from "../utils/axios";
+import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 
@@ -10,6 +10,7 @@ interface ChatStoreProps {
     isUsersLoading: boolean;
     isMessagesLoading: boolean;
     getUsers: () => void;
+    sendMessage: (userId: string, message: FormData) => void;
     setSelectedUser: (user: UserModel | null) => void;
 }
 
@@ -30,7 +31,15 @@ export const useChatStore = create<ChatStoreProps>((set) => ({
             set({ isUsersLoading: false });
         }
     },
-    setSelectedUser: async (selectedUser:UserModel | null) => {
+    sendMessage: async (userId: string, message: FormData) => {
+        try {
+            const { data } = await axiosInstance.post<GenericReponseModel>("/messages/send/" + userId,message);
+            console.log("DATA : ", data);
+        } catch (error) {
+            handleApiError(error);
+        }
+    },
+    setSelectedUser: async (selectedUser: UserModel | null) => {
         set({ selectedUser });
     }
 }));

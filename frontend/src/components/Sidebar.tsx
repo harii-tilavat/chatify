@@ -1,12 +1,13 @@
 import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Sidebar = () => {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const { users: filteredUsers, getUsers, selectedUser, setSelectedUser } = useChatStore();
-  const onlineUsers: Array<string> = [];
-
+  const { onlineUsers } = useAuthStore();
+  console.log("ON : ", onlineUsers);
   useEffect(() => {
     getUsers();
   }, [getUsers]);

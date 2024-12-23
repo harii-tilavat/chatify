@@ -1,33 +1,39 @@
 const { Server } = require("socket.io");
+const http = require("http");
+const express = require("express");
 
-const onlineUsers = new Map();
-const initializeSocket = (server) => {
-    const io = new Server(server, {
-        cors: {
-            origin: "http://localhost:5174",
-            methods: ["GET", 'POST'],
-            credentials: true
-        }
-    });
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        // origin: "http://localhost:5173",
+        methods: ["GET", 'POST'],
+        credentials: true
+    }
+});
 
-    // Handle socket connections
-    io.on("connection", (socket) => {
-        const { userId, username } = socket.handshake.query;
-        console.log("Socket connected : ", { id: socket.id, userId, username });
-        // onlineUsers.set(userId, socket.id)
-        onlineUsers.set(userId, socket.id);
-        console.log("MAP : ", onlineUsers);
-        
-        
-        
-        socket.on("disconnect", (reason) => {
-            console.log("Socket Disconnected: ", reason);
-            onlineUsers.delete(userId);
-            console.log("MAP : ", onlineUsers);
-        })
-    });
-    return io;
+// used to store online users
+const onlineUsersMap = new Map(); // {userId: socketId}
+const getSocketId = (userId) => {
+    return onlineUsersMap.get(userId);
 }
+// Handle socket connections
+io.on("connection", (socket) => {
+    const { userId, username } = socket.handshake.query;
+    console.log("Socket connected : ", { id: socket.id, userId, username });
+    // onlineUsersMap.set(userId, socket.id)
+    onlineUsersMap.set(userId, socket.id);
+    console.log("MAP : ", onlineUsersMap);
+
+    io.emit("getOnlineUsers", [...onlineUsersMap.keys()]);
+
+    socket.on("disconnect", (reason) => {
+        console.log("Socket Disconnected: ", reason);
+        onlineUsersMap.delete(userId);
+        console.log("MAP : ", onlineUsersMap);
+        io.emit("getOnlineUsers", [...onlineUsersMap.keys()]);
+    })
+});
 
 // Handle socket connections
 // io.on("connection", (socket) => {
@@ -39,4 +45,4 @@ const initializeSocket = (server) => {
 //     })
 // })
 
-module.exports = { initializeSocket };
+module.exports = { io, server, app, getSocketId };

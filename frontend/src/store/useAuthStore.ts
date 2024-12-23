@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { LoginModel, LoginResponseModel, SignupModel, UserModel } from "../models/authModel";
-import axiosInstance from "../utils/axios";
+import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { toast } from "react-toastify";
@@ -9,7 +9,7 @@ import { Socket } from "socket.io-client";
 interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
-    onlineUsersId: Array<string>;
+    onlineUsers: Array<string>;
     login: (user: LoginModel) => void;
     signup: (user: SignupModel) => void;
     checkAuth: () => void;
@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
     isLoading: false,
     socket: null,
     currentUser: JSON.parse(localStorage.getItem("user") || "null"),
-    onlineUsersId: [],
+    onlineUsers: [],
     checkAuth: async () => {
         try {
             const user = get().currentUser;
@@ -95,8 +95,13 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             const currentUser = get().currentUser;
             if (currentUser) {
                 const socket = initilizeSocket(currentUser);
+
+                socket.on("getOnlineUsers", (onlineUsers) => {
+                    set({ onlineUsers });
+                })
                 set({ socket });
             }
         }
     },
+
 }))

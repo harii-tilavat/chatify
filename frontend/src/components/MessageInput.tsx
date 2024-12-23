@@ -1,17 +1,33 @@
 import { Image, Send, X } from "lucide-react";
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { convertToBase64 } from "../utils/helpers";
+import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { socket } = useAuthStore();
+  const { selectedUser, sendMessage } = useChatStore();
+
+  useEffect(() => {
+    removeImage();
+    setText("");
+  }, [selectedUser]);
+
+  
   function handleSendMessage(e: FormEvent) {
     e.preventDefault();
     if (text.trim() || file) {
-      console.log("DATA", { text, file });
+      const formData = new FormData();
+      if (text) formData.append("text", text);
+      if (file) formData.append("file", file);
+      if (socket && selectedUser) {
+        sendMessage(selectedUser.id, formData);
+      }
     }
   }
 
