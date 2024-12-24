@@ -1,4 +1,8 @@
 export interface MessageModel {
+    createdAt: string;
+    updatedAt: string;
     text: string;
-    file: File | string | undefined;
+    image: string;
+    senderId: string;
+    receiverId: string;
 }

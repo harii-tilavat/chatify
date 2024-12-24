@@ -9,7 +9,7 @@ const HomePage = () => {
   const { socket } = useAuthStore();
   if (socket) {
     socket.on("getOnlineUsers", (res) => {
-      console.log("RESPONSE : ", res);
+      // console.log("RESPONSE : ", res);
     });
   }
   console.log("SOCKET : ", socket);

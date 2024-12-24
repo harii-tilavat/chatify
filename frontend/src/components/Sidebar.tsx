@@ -2,12 +2,14 @@ import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import Avatar from "./Avatar";
 
 const Sidebar = () => {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
-  const { users: filteredUsers, getUsers, selectedUser, setSelectedUser } = useChatStore();
+  const { users, getUsers, selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
-  console.log("ON : ", onlineUsers);
+
+  const filteredUsers = showOnlineOnly ? users.filter((user) => onlineUsers.includes(user.id)) : users;
   useEffect(() => {
     getUsers();
   }, [getUsers]);
@@ -24,7 +26,7 @@ const Sidebar = () => {
             <input type="checkbox" checked={showOnlineOnly} onChange={(e) => setShowOnlineOnly(e.target.checked)} className="checkbox checkbox-sm" />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">({onlineUsers.length} online)</span>
+          <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
         </div>
       </div>
 
@@ -40,12 +42,8 @@ const Sidebar = () => {
           `}
           >
             <div className="relative mx-auto lg:mx-0">
-              {user.profile && <img src={user.profile} alt="Profile" className={`size-12 rounded-full object-cover`} />}
-              {!user.profile && (
-                <div className="size-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  <span className="text-base">{user.fullName[0].toUpperCase()}</span>
-                </div>
-              )}
+              {/* Avatar */}
+              {<Avatar user={user} />}
 
               {/* <img src={user.profile || "/avatar.png"} alt={user.fullName} className="size-12 object-cover rounded-full" /> */}
               {onlineUsers.includes(user.id) && (

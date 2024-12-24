@@ -11,7 +11,7 @@ class FileUploader {
                     if (err) {
                         reject(err);
                     }
-                    resolve(result);
+                    resolve(result.secure_url);
                 });
                 streamifier.createReadStream(buffer).pipe(uploadStream);
             } catch (error) {

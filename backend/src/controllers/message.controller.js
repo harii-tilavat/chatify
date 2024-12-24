@@ -1,6 +1,7 @@
 const { getSocketId, io } = require("../config/socket");
+const { AppError } = require("../middlewares/error-handler.midllerware");
 const MessageService = require("../services/message.service");
-const { Response, Message } = require("../utils/response");
+const { Response, Message, StatusCode } = require("../utils/response");
 const messageService = new MessageService();
 
 class MessageController {
@@ -17,17 +18,13 @@ class MessageController {
     }
     async sendMessage(req, res, next) {
         try {
-            const { userId } = req.user;
             const { id } = req.params;
-            const { text, file } = req.body;
-            const socketId = getSocketId(id);
-            if (socketId) {
-                io.to(socketId).emit("newMessage", text);
+            const { text } = req.body;
 
-                console.log("SOCKET : ", socketId);
-
-            }
-            return Response.success(res, Message.SUCCESS);
+            if (!id) throw new AppError(StatusCode.BAD_REQUEST, Message.REQUIRED_FIELDS_MISSING);
+            const { userId } = req.user;
+            const updatedMessage = await messageService.sendMessage(userId, id, text, req.file);
+            return Response.success(res, Message.SUCCESS, updatedMessage);
             // const { message } = res.body;
             // const socketId = getSocketId()
         } catch (error) {
