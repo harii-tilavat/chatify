@@ -17,10 +17,17 @@ class MessageService {
         try {
             let message = { text, image: null };
             if (file) {
-                // const image = FileUploader.uploadStream(file.buffer);
-                // message = { ...message, image };
+                const image = await FileUploader.uploadStream(file.buffer);
+                message = { ...message, image };
             }
             return await this.messageRepo.sendMessage(senderId, receiverId, message)
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getMessages(senderId, receiverId) {
+        try {
+            return this.messageRepo.getMessages(senderId, receiverId);
         } catch (error) {
             throw error;
         }

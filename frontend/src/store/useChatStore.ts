@@ -4,7 +4,6 @@ import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { MessageModel } from "../models/messageModel";
-import { MESSAGES } from "../utils/constants";
 
 interface ChatStoreProps {
     users: Array<UserModel>;
@@ -14,12 +13,13 @@ interface ChatStoreProps {
     messages: Array<MessageModel>;
     getUsers: () => void;
     sendMessage: (userId: string, message: FormData) => void;
+    getMessages: (userId: string) => void;
     setSelectedUser: (user: UserModel | null) => void;
 }
 
-export const useChatStore = create<ChatStoreProps>((set) => ({
+export const useChatStore = create<ChatStoreProps>((set, get) => ({
     users: [],
-    messages: MESSAGES,
+    messages: [],
     selectedUser: null,
     isUsersLoading: false,
     isMessagesLoading: false,
@@ -37,12 +37,28 @@ export const useChatStore = create<ChatStoreProps>((set) => ({
     },
     sendMessage: async (userId: string, message: FormData) => {
         try {
-            const { data } = await axiosInstance.post<GenericReponseModel>("/messages/send/" + userId, message, {
+            const { data } = await axiosInstance.post<GenericReponseModel<MessageModel>>("/messages/send/" + userId, message, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            console.log("DATA : ", data);
+            const newMessage = data.data;
+            if (newMessage) {
+                set({ messages: [...get().messages, newMessage] });
+            }
+            // Pending...
         } catch (error) {
             handleApiError(error);
+        }
+    },
+    getMessages: async (userId: string) => {
+        set({ isMessagesLoading: true, messages: [] });
+        try {
+            const { data } = await axiosInstance.get<GenericReponseModel<Array<MessageModel>>>("/messages/" + userId);
+            const messages = data.data;
+            set({ messages });
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            set({ isMessagesLoading: false });
         }
     },
     setSelectedUser: async (selectedUser: UserModel | null) => {

@@ -10,7 +10,7 @@ const messageController = new MessageController();
 
 
 router.get("/users", authMiddleware, messageController.getUsers);
-// router.post("/send/:id", authMiddleware, upload.single("file"), messageController.sendMessage);
 router.post("/send/:id", authMiddleware, upload.single("file"), messageController.sendMessage);
+router.get("/:id", authMiddleware, messageController.getMessages);
 
 module.exports = router;

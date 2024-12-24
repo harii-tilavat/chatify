@@ -24,5 +24,20 @@ class MessageRepo {
             throw new DBError(error);
         }
     }
+    async getMessages(senderId, receiverId) {
+        try {
+            return await prisma.message.findMany({
+                where: {
+                    OR: [
+                        { senderId, receiverId },
+                        { senderId: receiverId, receiverId: senderId }
+                    ]
+                },
+                orderBy: { createdAt: 'asc' }
+            })
+        } catch (error) {
+            throw new DBError(error);
+        }
+    }
 }
 module.exports = MessageRepo;

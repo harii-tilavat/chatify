@@ -8,6 +8,16 @@ export const formateDate = (date: string | Date): string => {
     const options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
     return new Intl.DateTimeFormat("en-US", options).format(new Date(date));
 };
+export const formatTime = (date: string | Date): string => {
+    const options: Intl.DateTimeFormatOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true, // AM/PM format
+    };
+
+    return new Intl.DateTimeFormat("en-US", options).format(new Date(date));
+};
+
 
 export const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {

@@ -18,15 +18,16 @@ const MessageInput = () => {
     setText("");
   }, [selectedUser]);
 
-  
-  function handleSendMessage(e: FormEvent) {
+  async function handleSendMessage(e: FormEvent) {
     e.preventDefault();
     if (text.trim() || file) {
       const formData = new FormData();
       if (text) formData.append("text", text);
       if (file) formData.append("file", file);
       if (socket && selectedUser) {
-        sendMessage(selectedUser.id, formData);
+        await sendMessage(selectedUser.id, formData);
+        removeImage();
+        setText("");
       }
     }
   }
@@ -48,7 +49,7 @@ const MessageInput = () => {
     }
   }
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full absolute bottom-0">
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
