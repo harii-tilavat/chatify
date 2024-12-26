@@ -7,13 +7,15 @@ import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { MessageCircle } from "lucide-react";
 
 const ChatContainer = () => {
-  const { selectedUser, messages, isMessagesLoading, getMessages } = useChatStore();
+  const { selectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages } = useChatStore();
   const messageContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser?.id);
+      subscribeToMessages();
     }
-  }, [selectedUser, getMessages]);
+    return () => unsubscribeToMessages();
+  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeToMessages]);
 
   useEffect(() => {
     if (messages.length > 0) {

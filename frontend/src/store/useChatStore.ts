@@ -4,6 +4,7 @@ import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { MessageModel } from "../models/messageModel";
+import { useAuthStore } from "./useAuthStore";
 
 interface ChatStoreProps {
     users: Array<UserModel>;
@@ -14,6 +15,8 @@ interface ChatStoreProps {
     getUsers: () => void;
     sendMessage: (userId: string, message: FormData) => void;
     getMessages: (userId: string) => void;
+    subscribeToMessages: () => void;
+    unsubscribeToMessages: () => void;
     setSelectedUser: (user: UserModel | null) => void;
 }
 
@@ -44,9 +47,25 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
             if (newMessage) {
                 set({ messages: [...get().messages, newMessage] });
             }
-            // Pending...
         } catch (error) {
             handleApiError(error);
+        }
+    },
+    subscribeToMessages: async () => {
+        const selectedUser = get().selectedUser;
+        if (!selectedUser) return;
+        const socket = useAuthStore.getState().socket;
+        if (socket) {
+            socket.on("newMessage", (newMessage: MessageModel) => {
+                set({ messages: [...get().messages, newMessage] });
+                // debugger;
+            })
+        }
+    },
+    unsubscribeToMessages: async () => {
+        const socket = useAuthStore.getState().socket;
+        if (socket) {
+            socket.off("newMessage");
         }
     },
     getMessages: async (userId: string) => {

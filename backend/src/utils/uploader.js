@@ -1,5 +1,7 @@
 const cloudinary = require("../config/cloudinary.config"); // Assuming Cloudinary is configured
 const streamifier = require('streamifier');
+const { AppError } = require("../middlewares/error-handler.midllerware");
+const { StatusCode, Message } = require("./response");
 class FileUploader {
     // Static method to upload the buffer to Cloudinary
     static async uploadStream(buffer) {
@@ -11,7 +13,10 @@ class FileUploader {
                     if (err) {
                         reject(err);
                     }
-                    resolve(result.secure_url);
+                    if (result) {
+                        resolve(result.secure_url);
+                    }
+                    reject(new AppError(StatusCode.SERVICE_UNAVAILABLE, Message.INTERNAL_SERVER_ERROR));
                 });
                 streamifier.createReadStream(buffer).pipe(uploadStream);
             } catch (error) {

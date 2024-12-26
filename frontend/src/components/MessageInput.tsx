@@ -3,6 +3,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { convertToBase64 } from "../utils/helpers";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import { toast } from "react-toastify";
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
@@ -20,6 +21,7 @@ const MessageInput = () => {
 
   async function handleSendMessage(e: FormEvent) {
     e.preventDefault();
+
     if (text.trim() || file) {
       const formData = new FormData();
       if (text) formData.append("text", text);
@@ -35,6 +37,19 @@ const MessageInput = () => {
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
     const currentFile = e.target.files?.length ? e.target.files[0] : null;
     if (currentFile) {
+      // Validation: Check if file is an image and size is <= 10 MB
+      const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+      const maxFileSize = 10 * 1024 * 1024; // 10 MB
+
+      if (!validImageTypes.includes(currentFile.type)) {
+        toast.error("Only image files (JPEG, PNG, GIF, WebP) are allowed.");
+        return;
+      }
+
+      if (currentFile.size > maxFileSize) {
+        toast.error("File size must be less than or equal to 10 MB. Your size is "+(currentFile.size / 1024 / 1024).toFixed(2) + ' MB');
+        return;
+      }
       const base64Image = await convertToBase64(currentFile);
       setImagePreview(base64Image);
       setFile(currentFile);

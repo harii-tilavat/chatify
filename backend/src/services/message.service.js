@@ -1,3 +1,4 @@
+const { getSocketId, io } = require("../config/socket");
 const MessageRepo = require("../repositories/message.repo");
 const FileUploader = require("../utils/uploader");
 
@@ -20,7 +21,10 @@ class MessageService {
                 const image = await FileUploader.uploadStream(file.buffer);
                 message = { ...message, image };
             }
-            return await this.messageRepo.sendMessage(senderId, receiverId, message)
+            const newMessage = await this.messageRepo.sendMessage(senderId, receiverId, message);
+            const receiverSocketId = getSocketId(receiverId);
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+            return newMessage;
         } catch (error) {
             throw error;
         }
