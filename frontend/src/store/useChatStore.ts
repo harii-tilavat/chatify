@@ -73,13 +73,12 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
 
-        const { messages, users } = get();
         if (socket) {
             const handleNewMessage = (newMessage: MessageModel) => {
                 if (selectedUser.id === newMessage.senderId) {
-                    set({ messages: [...messages, newMessage] });
+                    set({ messages: [...get().messages, newMessage] });
                 } else {
-                    const messageUser = users.find(i => i.id === newMessage.senderId);
+                    const messageUser = get().users.find(i => i.id === newMessage.senderId);
                     toast.info(`${messageUser?.fullName || "Unknown"}: ${newMessage.text || "New message received!"}`);
                 }
 

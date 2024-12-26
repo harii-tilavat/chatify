@@ -4,7 +4,6 @@ import { convertToBase64 } from "../utils/helpers";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { toast } from "react-toastify";
-let typingTimeout: ReturnType<typeof setTimeout>;
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
@@ -15,8 +14,6 @@ const MessageInput = () => {
   const { socket } = useAuthStore();
   const { selectedUser, sendMessage, isMessageSending } = useChatStore();
   const { currentUser } = useAuthStore();
-  const [isTyping, setIsTyping] = useState(false);
-  const typingDelay = 5000; // Delay in ms to emit typing status (e.g., 1 second)
 
   useEffect(() => {
     removeImage();

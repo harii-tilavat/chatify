@@ -10,7 +10,6 @@ const ChatContainer = () => {
   const { selectedUser, setSelectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages, typingStatus } = useChatStore();
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null); // State for the image to preview
-  console.log("TYPING STATUS : ", typingStatus);
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser?.id);
