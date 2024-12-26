@@ -23,15 +23,24 @@ io.on("connection", (socket) => {
     console.log("Socket connected : ", { id: socket.id, userId, username });
     // onlineUsersMap.set(userId, socket.id)
     onlineUsersMap.set(userId, socket.id);
-    console.log("MAP : ", onlineUsersMap);
+    console.log("Updated MAP: ", onlineUsersMap);
+
 
     io.emit("getOnlineUsers", [...onlineUsersMap.keys()]);
 
     socket.on("disconnect", (reason) => {
         console.log("Socket Disconnected: ", reason);
         onlineUsersMap.delete(userId);
-        console.log("MAP : ", onlineUsersMap);
+        console.log("MAP after disconnect : ", onlineUsersMap);
         io.emit("getOnlineUsers", [...onlineUsersMap.keys()]);
+    })
+
+    socket.on("typing", (typingStatus) => {
+        const { isTyping, senderId, receiverId } = typingStatus;
+        const socketId = getSocketId(receiverId);
+        if (socketId) {
+            socket.to(socketId).emit("typing", { isTyping, senderId, receiverId, });
+        }
     })
 });
 

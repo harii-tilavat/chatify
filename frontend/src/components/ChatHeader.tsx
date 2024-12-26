@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Ellipsis, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import Avatar from "./Avatar";
@@ -21,10 +21,23 @@ const ChatHeader = () => {
           </div>
         </div>
 
-        {/* Close button */}
-        <button onClick={() => setSelectedUser(null)}>
-          <X />
-        </button>
+        {/* Button */}
+        <div className="buttons">
+          <details className="dropdown dropdown-end border-base-300">
+            <summary className="btn m-1 bg-transparent border-transparent"><Ellipsis/></summary>
+            <ul className="menu dropdown-content bg-base-100 rounded-box z-[1]  p-2 shadow-primary w-40 border-b border-base-300">
+              <li>
+                <a>Clear chat</a>
+              </li>
+              <li>
+                <a>Close</a>
+              </li>
+            </ul>
+          </details>
+          <button onClick={() => setSelectedUser(null)}>
+            <X />
+          </button>
+        </div>
       </div>
     </div>
   );

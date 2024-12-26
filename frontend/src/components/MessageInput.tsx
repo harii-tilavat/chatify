@@ -1,9 +1,10 @@
-import { Image, Send, X } from "lucide-react";
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { Image, Loader2, Send, X } from "lucide-react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { convertToBase64 } from "../utils/helpers";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { toast } from "react-toastify";
+let typingTimeout: ReturnType<typeof setTimeout>;
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
@@ -12,7 +13,10 @@ const MessageInput = () => {
   const [text, setText] = useState<string>("");
 
   const { socket } = useAuthStore();
-  const { selectedUser, sendMessage } = useChatStore();
+  const { selectedUser, sendMessage, isMessageSending } = useChatStore();
+  const { currentUser } = useAuthStore();
+  const [isTyping, setIsTyping] = useState(false);
+  const typingDelay = 5000; // Delay in ms to emit typing status (e.g., 1 second)
 
   useEffect(() => {
     removeImage();
@@ -33,6 +37,18 @@ const MessageInput = () => {
       }
     }
   }
+  const emitTypingStatus = useCallback(
+    (typing: boolean) => {
+      if (socket) {
+        socket.emit("typing", {
+          senderId: currentUser?.id,
+          receiverId: selectedUser?.id,
+          isTyping: typing,
+        });
+      }
+    },
+    [currentUser, selectedUser, socket]
+  );
 
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
     const currentFile = e.target.files?.length ? e.target.files[0] : null;
@@ -47,7 +63,7 @@ const MessageInput = () => {
       }
 
       if (currentFile.size > maxFileSize) {
-        toast.error("File size must be less than or equal to 10 MB. Your size is "+(currentFile.size / 1024 / 1024).toFixed(2) + ' MB');
+        toast.error("File size must be less than or equal to 10 MB. Your size is " + (currentFile.size / 1024 / 1024).toFixed(2) + " MB");
         return;
       }
       const base64Image = await convertToBase64(currentFile);
@@ -55,7 +71,29 @@ const MessageInput = () => {
       setFile(currentFile);
     }
   }
+  function handleInputChange(value: string) {
+    // if (value !== "") {
+    //   if (!isTyping) {
+    //     setIsTyping(true);
+    //     emitTypingStatus(true); // Emit typing status as true when typing starts
+    //   }
+    //   clearTimeout(typingTimeout);
+    //   typingTimeout = setTimeout(() => {
+    //     setIsTyping(false);
+    //     emitTypingStatus(true); // Emit typing status as false after a delay
+    //   }, typingDelay);
+    // } else {
+    //   clearTimeout(typingTimeout);
+    //   if (isTyping) {
+    //     setIsTyping(false);
+    //     emitTypingStatus(false); // Emit typing status as false if input is cleared
+    //   }
+    // }
 
+    emitTypingStatus(value !== ""); // Emit typing status as true when typing starts
+
+    setText(value);
+  }
   function removeImage() {
     setImagePreview("");
     setFile(null);
@@ -83,7 +121,7 @@ const MessageInput = () => {
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
-          <input type="text" className="w-full input input-bordered rounded-lg input-sm sm:input-md" placeholder="Type a message..." value={text} onChange={(e) => setText(e.target.value)} />
+          <input type="text" className="w-full input input-bordered rounded-lg input-sm sm:input-md" placeholder="Type a message..." value={text} onChange={(e) => handleInputChange(e.target.value)} />
           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
 
           <button
@@ -96,7 +134,8 @@ const MessageInput = () => {
           </button>
         </div>
         <button type="submit" className="btn btn-sm btn-circle" disabled={!text.trim() && !imagePreview}>
-          <Send size={22} />
+          {isMessageSending && <Loader2 size={22} className="animate-spin" />}
+          {!isMessageSending && <Send size={22} />}
         </button>
       </form>
     </div>

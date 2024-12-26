@@ -1,6 +1,6 @@
 const MessageSkeleton = () => {
   // Create an array of 6 items for skeleton messages
-  const skeletonMessages = Array(6).fill(null);
+  const skeletonMessages = Array(4).fill(null);
 
   return (
     <div className="flex-1 p-4 space-y-4">

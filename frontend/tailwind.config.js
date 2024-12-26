@@ -6,7 +6,18 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        "typing-bounce": "typing-bounce 1.2s infinite",
+      },
+      keyframes: {
+        "typing-bounce": {
+          "0%, 80%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+      },
+
+    },
   },
   plugins: [daisyui],
   daisyui: {

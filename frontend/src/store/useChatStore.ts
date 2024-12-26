@@ -5,27 +5,36 @@ import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
 import { MessageModel } from "../models/messageModel";
 import { useAuthStore } from "./useAuthStore";
+import { toast } from "react-toastify";
 
 interface ChatStoreProps {
     users: Array<UserModel>;
     selectedUser: UserModel | null;
     isUsersLoading: boolean;
     isMessagesLoading: boolean;
+    isMessageSending: boolean;
+    typingStatus: TypingStatus;
     messages: Array<MessageModel>;
     getUsers: () => void;
     sendMessage: (userId: string, message: FormData) => void;
     getMessages: (userId: string) => void;
     subscribeToMessages: () => void;
-    unsubscribeToMessages: () => void;
+    unsubscribeToMessages: (receiverId: string) => void;
     setSelectedUser: (user: UserModel | null) => void;
 }
-
+interface TypingStatus {
+    senderId: string | null;
+    receiverId: string | null;
+    isTyping: boolean;
+}
 export const useChatStore = create<ChatStoreProps>((set, get) => ({
     users: [],
     messages: [],
     selectedUser: null,
     isUsersLoading: false,
     isMessagesLoading: false,
+    isMessageSending: false,
+    typingStatus: { isTyping: false, senderId: null, receiverId: null },
     getUsers: async () => {
         set({ isUsersLoading: true });
         try {
@@ -38,34 +47,64 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
             set({ isUsersLoading: false });
         }
     },
-    sendMessage: async (userId: string, message: FormData) => {
+    sendMessage: async (receiverId: string, message: FormData) => {
+        set({ isMessageSending: true });
         try {
-            const { data } = await axiosInstance.post<GenericReponseModel<MessageModel>>("/messages/send/" + userId, message, {
+            const { data } = await axiosInstance.post<GenericReponseModel<MessageModel>>("/messages/send/" + receiverId, message, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
             const newMessage = data.data;
             if (newMessage) {
                 set({ messages: [...get().messages, newMessage] });
+                const socket = useAuthStore.getState().socket;
+                if (socket) {
+                    socket.emit("typing", { isTyping: false, senderId: useAuthStore.getState().currentUser?.id, receiverId });
+                }
             }
         } catch (error) {
             handleApiError(error);
+        }
+        finally {
+            set({ isMessageSending: false });
         }
     },
     subscribeToMessages: async () => {
         const selectedUser = get().selectedUser;
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
+
+        const { messages, users } = get();
         if (socket) {
-            socket.on("newMessage", (newMessage: MessageModel) => {
-                set({ messages: [...get().messages, newMessage] });
-                // debugger;
-            })
+            const handleNewMessage = (newMessage: MessageModel) => {
+                if (selectedUser.id === newMessage.senderId) {
+                    set({ messages: [...messages, newMessage] });
+                } else {
+                    const messageUser = users.find(i => i.id === newMessage.senderId);
+                    toast.info(`${messageUser?.fullName || "Unknown"}: ${newMessage.text || "New message received!"}`);
+                }
+
+            }
+            const handleTypingStatus = (status: TypingStatus) => {
+                const { isTyping, receiverId, senderId } = status;
+                if (get().typingStatus.isTyping !== isTyping || get().typingStatus.senderId !== senderId) {
+                    set({
+                        typingStatus: {
+                            isTyping, receiverId, senderId
+                        }
+                    });
+                }
+            }
+            socket.on("newMessage", handleNewMessage);
+            socket.on("typing", handleTypingStatus);
         }
     },
-    unsubscribeToMessages: async () => {
+    unsubscribeToMessages: async (receiverId: string) => {
         const socket = useAuthStore.getState().socket;
         if (socket) {
             socket.off("newMessage");
+            socket.emit("typing", { isTyping: false, senderId: null, receiverId });
+            // socket.off("typing");
+            set({ typingStatus: { isTyping: false, senderId: null, receiverId: null } });
         }
     },
     getMessages: async (userId: string) => {

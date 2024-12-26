@@ -1,32 +1,45 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Message } from "./Chat/Message";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { MessageCircle } from "lucide-react";
-
+import ImagePreview from "./ImagePreview";
 const ChatContainer = () => {
-  const { selectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages } = useChatStore();
+  const { selectedUser, setSelectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages, typingStatus } = useChatStore();
   const messageContainerRef = useRef<HTMLDivElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null); // State for the image to preview
+  console.log("TYPING STATUS : ", typingStatus);
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser?.id);
       subscribeToMessages();
     }
-    return () => unsubscribeToMessages();
-  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeToMessages]);
+    return () => {
+      // setSelectedUser(null);
+      console.log("-------------- UNSUBSCRIBING ---------");
+      if (selectedUser) {
+        unsubscribeToMessages(selectedUser.id);
+      }
+    };
+  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeToMessages, setSelectedUser]);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      const lastElement = document.getElementById(lastMessage.id);
-      lastElement?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+    messageContainerRef.current?.scrollTo({
+      top: messageContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, typingStatus.isTyping]);
+
+  const handleImageClick = (image: string) => {
+    setPreviewImage(image);
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-auto h-full">
       <ChatHeader />
+
       <div className="main-chat-container overflow-y-auto relative mb-14" ref={messageContainerRef}>
         {/* Skeliton */}
         {isMessagesLoading && <MessageSkeleton />}
@@ -43,14 +56,18 @@ const ChatContainer = () => {
           )}
 
           {messages.map((message, i) => (
-            <Message user={selectedUser!} message={message} key={i} />
+            <Message user={selectedUser!} message={message} key={i} onImageClick={handleImageClick} />
           ))}
+          <div id="typing-status">{typingStatus.isTyping && typingStatus.senderId === selectedUser?.id && <Message user={selectedUser!} isTyping />}</div>
 
           {/* End message block  */}
         </div>
       </div>
 
       <MessageInput />
+
+      {/* Image Preview Modal */}
+      {previewImage && <ImagePreview image={previewImage} onClose={() => setPreviewImage(null)} />}
     </div>
   );
 };
