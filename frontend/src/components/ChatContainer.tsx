@@ -57,7 +57,7 @@ const ChatContainer = () => {
           {messages.map((message, i) => (
             <Message user={selectedUser!} message={message} key={i} onImageClick={handleImageClick} />
           ))}
-          <div id="typing-status">{typingStatus.isTyping && typingStatus.senderId === selectedUser?.id && <Message user={selectedUser!} isTyping />}</div>
+          <div id="typing-status">{typingStatus.isTyping && typingStatus.senderId === selectedUser?.id && <Message user={selectedUser!} typingStatus={typingStatus} />}</div>
 
           {/* End message block  */}
         </div>

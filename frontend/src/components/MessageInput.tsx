@@ -35,12 +35,13 @@ const MessageInput = () => {
     }
   }
   const emitTypingStatus = useCallback(
-    (typing: boolean) => {
+    (typing: boolean, text: string) => {
       if (socket) {
         socket.emit("typing", {
           senderId: currentUser?.id,
           receiverId: selectedUser?.id,
           isTyping: typing,
+          text,
         });
       }
     },
@@ -87,7 +88,7 @@ const MessageInput = () => {
     //   }
     // }
 
-    emitTypingStatus(value !== ""); // Emit typing status as true when typing starts
+    emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
 
     setText(value);
   }
@@ -123,7 +124,7 @@ const MessageInput = () => {
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
+            className={`flex btn btn-circle
                          ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >

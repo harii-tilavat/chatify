@@ -3,7 +3,7 @@ import { UserModel } from "../models/authModel";
 import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
-import { MessageModel } from "../models/messageModel";
+import { MessageModel, TypingStatus } from "../models/messageModel";
 import { useAuthStore } from "./useAuthStore";
 import { toast } from "react-toastify";
 
@@ -22,11 +22,7 @@ interface ChatStoreProps {
     unsubscribeToMessages: (receiverId: string) => void;
     setSelectedUser: (user: UserModel | null) => void;
 }
-interface TypingStatus {
-    senderId: string | null;
-    receiverId: string | null;
-    isTyping: boolean;
-}
+
 export const useChatStore = create<ChatStoreProps>((set, get) => ({
     users: [],
     messages: [],
@@ -34,7 +30,7 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
     isUsersLoading: false,
     isMessagesLoading: false,
     isMessageSending: false,
-    typingStatus: { isTyping: false, senderId: null, receiverId: null },
+    typingStatus: { isTyping: false, senderId: null, receiverId: null, text: "" },
     getUsers: async () => {
         set({ isUsersLoading: true });
         try {
@@ -58,7 +54,7 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
                 set({ messages: [...get().messages, newMessage] });
                 const socket = useAuthStore.getState().socket;
                 if (socket) {
-                    socket.emit("typing", { isTyping: false, senderId: useAuthStore.getState().currentUser?.id, receiverId });
+                    socket.emit("typing", { isTyping: false, senderId: useAuthStore.getState().currentUser?.id, receiverId, text: "" });
                 }
             }
         } catch (error) {
@@ -84,14 +80,13 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
 
             }
             const handleTypingStatus = (status: TypingStatus) => {
-                const { isTyping, receiverId, senderId } = status;
-                if (get().typingStatus.isTyping !== isTyping || get().typingStatus.senderId !== senderId) {
-                    set({
-                        typingStatus: {
-                            isTyping, receiverId, senderId
-                        }
-                    });
-                }
+                const { isTyping, receiverId, senderId, text } = status;
+                // const isTypingChange = get().typingStatus.isTyping !== isTyping || get().typingStatus.senderId !== senderId; // For managing multiple status
+                set({
+                    typingStatus: {
+                        isTyping, receiverId, senderId, text
+                    }
+                });
             }
             socket.on("newMessage", handleNewMessage);
             socket.on("typing", handleTypingStatus);
@@ -103,7 +98,7 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
             socket.off("newMessage");
             socket.emit("typing", { isTyping: false, senderId: null, receiverId });
             // socket.off("typing");
-            set({ typingStatus: { isTyping: false, senderId: null, receiverId: null } });
+            set({ typingStatus: { isTyping: false, senderId: null, receiverId: null, text: "" } });
         }
     },
     getMessages: async (userId: string) => {

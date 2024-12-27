@@ -6,6 +6,7 @@ import { GenericReponseModel } from "../models";
 import { toast } from "react-toastify";
 import { initilizeSocket } from "../lib/socket";
 import { Socket } from "socket.io-client";
+import { useChatStore } from "./useChatStore";
 interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
@@ -94,12 +95,28 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
         if (!currentSocket || !currentSocket.connected) {
             const currentUser = get().currentUser;
             if (currentUser) {
-                const socket = initilizeSocket(currentUser);
+                const newSocket = initilizeSocket(currentUser);
 
-                socket.on("getOnlineUsers", (onlineUsers) => {
-                    set({ onlineUsers });
-                })
-                set({ socket });
+                newSocket.on("getOnlineUsers", (onlineUsersList) => {
+                    const previousOnlineUsers = new Set(get().onlineUsers);
+                    const currentUserId = currentUser.id;
+                    onlineUsersList.forEach((userId: string) => {
+                        if (!previousOnlineUsers.has(userId) && userId !== currentUserId) {
+                            const onlineUser = useChatStore
+                                .getState()
+                                .users.find((user) => user.id === userId);
+
+                            if (onlineUser) {
+                                if (!previousOnlineUsers.size) return;
+                                toast.info(`${onlineUser.fullName} is online!`, { position: "top-center" });
+                            }
+                        }
+                    });
+
+                    set({ onlineUsers: onlineUsersList });
+                });
+
+                set({ socket: newSocket });
             }
         }
     },

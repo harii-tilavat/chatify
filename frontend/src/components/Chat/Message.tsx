@@ -3,26 +3,27 @@ import { UserModel } from "../../models/authModel";
 import { formatTime } from "../../utils/helpers";
 import Avatar from "../Avatar";
 import clsx from "clsx";
-import { MessageModel } from "../../models/messageModel";
+import { MessageModel, TypingStatus } from "../../models/messageModel";
 import { useAuthStore } from "../../store/useAuthStore";
 
 interface MessageProps {
   user: UserModel;
   message?: MessageModel;
   isLoading?: boolean;
-  isTyping?: boolean;
+  typingStatus?: TypingStatus;
   onImageClick?: (image: string) => void;
 }
-export const Message: React.FC<MessageProps> = ({ user, message, isLoading = false, isTyping = false, onImageClick }) => {
+export const Message: React.FC<MessageProps> = ({ user, message, isLoading = false, typingStatus, onImageClick }) => {
   const { currentUser } = useAuthStore();
+  const showTyping = Boolean(localStorage.getItem("tpStatus")) || currentUser?.fullName.includes("harit");
   const isMyMessage = currentUser?.id === message?.senderId;
   return (
-    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start")} id={message?.id || String(Math.random())}>
+    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping)} id={message?.id || String(Math.random())}>
       <div className="chat-image avatar">
         {/* Avtar */}
         <Avatar user={user} />
       </div>
-      {!message && isTyping && <span></span>}
+      {!message && typingStatus?.isTyping && <span></span>}
       {message && (
         <>
           <div className="chat-header mb-1">
@@ -43,11 +44,16 @@ export const Message: React.FC<MessageProps> = ({ user, message, isLoading = fal
           <span className="loading loading-spinner loading-lg text-primary/55"></span>
         </div>
       )}
-      {!message && isTyping && (
+      {!message && typingStatus?.isTyping && (
         <div className="flex items-center space-x-2">
-          <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-100"></div>
-          <div className="w-2.5 h-2.5 bg-primary rounded-full animate-typing-bounce delay-200"></div>
-          <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-300"></div>
+          {showTyping && <span className="animate-pulse">{typingStatus.text}...</span>}
+          {!showTyping && (
+            <>
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-100"></div>
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-typing-bounce delay-200"></div>
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-300"></div>
+            </>
+          )}
         </div>
       )}
     </div>

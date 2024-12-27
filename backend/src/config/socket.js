@@ -36,10 +36,10 @@ io.on("connection", (socket) => {
     })
 
     socket.on("typing", (typingStatus) => {
-        const { isTyping, senderId, receiverId } = typingStatus;
+        const { isTyping, senderId, receiverId, text } = typingStatus;
         const socketId = getSocketId(receiverId);
         if (socketId) {
-            socket.to(socketId).emit("typing", { isTyping, senderId, receiverId, });
+            socket.to(socketId).emit("typing", { isTyping, senderId, receiverId, text });
         }
     })
 });
