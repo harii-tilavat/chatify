@@ -34,6 +34,15 @@ class AuthController {
             next(error);
         }
     }
+    async updateProfile(req, res, next) {
+        try {
+            const { userId } = req.user;
+            const updatedUser = await authService.updateProfile(userId, req.file);
+            return await Response.success(res, "Profile updated successfully.", updatedUser);
+        } catch (error) {
+            next(error);
+        }
+    }
     async logout(req, res, next) {
         try {
             JwtHelpwer.clearCookie(res);

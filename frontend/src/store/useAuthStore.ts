@@ -11,11 +11,12 @@ interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
     onlineUsers: Array<string>;
+    socket: Socket | null;
     login: (user: LoginModel) => void;
     signup: (user: SignupModel) => void;
     checkAuth: () => void;
+    updateProfile: (formData: FormData) => void;
     logout: () => void;
-    socket: Socket | null;
     connectSocket: () => void;
 }
 
@@ -65,7 +66,8 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/register", { fullName, email, password });
             const { message, data: userData } = data;
             set({ currentUser: userData?.user, });
-            toast.success(message || "Sign success.");
+            localStorage.setItem("user", JSON.stringify(userData?.user));
+            toast.success(message || "Signup success.");
             get().connectSocket();
         } catch (error) {
             handleApiError(error);
@@ -84,6 +86,22 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             if (currentSocket) {
                 currentSocket.disconnect();
             }
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+    updateProfile: async (formData: FormData) => {
+        set({ isLoading: true });
+        try {
+            const { data } = await axiosInstance.post<GenericReponseModel<UserModel>>("/auth/update-profile", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            const { message, data: currentUser } = data;
+            localStorage.setItem("user", JSON.stringify(currentUser?.profile));
+            set({ currentUser });
+            toast.success(message || "Profile updated successfully.");
         } catch (error) {
             handleApiError(error);
         } finally {

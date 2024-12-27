@@ -1,12 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useModal } from "../context/ModalContext";
+import Avatar from "./Avatar";
+import Dropdown from "./Dropdown";
 
 const Navbar = () => {
   const { currentUser, logout } = useAuthStore();
   const { openModal } = useModal();
+  const naviagate = useNavigate();
+  const navList = [
+    { label: "Profile", icon: <User size={16} />, action: () => naviagate("/profile") },
+    { label: "Settings", icon: <Settings size={16} />, action: () => naviagate("/settings") },
+    { label: "Logout", icon: <LogOut size={16} />, action: handleLogout },
+  ];
   function handleLogout() {
     openModal({
       title: "Logout?",
@@ -31,26 +39,20 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link to={"/settings"} className={`btn btn-sm gap-2 transition-colors`}>
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Link>
+          {!currentUser && (
+            <div className="flex items-center gap-2">
+              <Link to={"/settings"} className={`btn btn-sm gap-2 transition-colors`}>
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </Link>
+            </div>
+          )}
 
-            {currentUser && (
-              <>
-                <Link to={"/profile"} className={`btn btn-sm gap-2`}>
-                  <User className="size-5" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Link>
-
-                <button className="flex gap-2 items-center" onClick={handleLogout}>
-                  <LogOut className="size-5" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </>
-            )}
-          </div>
+          {currentUser && (
+            <Dropdown label="Options" items={navList}>
+              <Avatar user={currentUser!} />
+            </Dropdown>
+          )}
         </div>
       </div>
     </header>

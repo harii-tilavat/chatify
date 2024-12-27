@@ -1,21 +1,30 @@
 import { ChangeEvent, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Mail, User, User2 } from "lucide-react";
+import { Camera, Mail, User } from "lucide-react";
 import { convertToBase64, formateDate } from "../utils/helpers";
 
 const ProfilePage = () => {
-  const { currentUser, isLoading } = useAuthStore();
-  const [selectedImg, setSelectedImg] = useState<string | null>(null);
+  const { currentUser, isLoading, updateProfile } = useAuthStore();
+  const [fileContent, setFileContent] = useState<{ preview: string; file: File | undefined | null }>({ file: null, preview: "" });
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    const base64Image = await convertToBase64(file);
-    setSelectedImg(base64Image);
+    const preview = await convertToBase64(file);
+    setFileContent({ file, preview });
     // await updateProfile({ profilePic: base64Image });
   };
-
+  const handleSubmit = () => {
+    if (fileContent.file && fileContent.preview) {
+      const formData = new FormData();
+      formData.append("file", fileContent.file);
+      updateProfile(formData);
+    }
+  };
+  const handleReset = () => {
+    setFileContent({ file: null, preview: "" });
+  };
   return (
     <div className="pt-20">
       <div className="max-w-2xl mx-auto p-4 py-8">
@@ -29,8 +38,8 @@ const ProfilePage = () => {
 
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <img src={selectedImg || currentUser?.profile} alt="Profile" className={`size-32 rounded-full object-cover border-4 ${!selectedImg && !currentUser?.profile && "hidden"}`} />
-              {!selectedImg && !currentUser?.profile && (
+              <img src={fileContent.preview || currentUser?.profile} alt="Profile" className={`size-32 rounded-full object-cover border-4 ${!fileContent.preview && !currentUser?.profile && "hidden"}`} />
+              {!fileContent.preview && !currentUser?.profile && (
                 <div className="size-32 bg-primary/20 rounded-full flex items-center justify-center">
                   <span className="text-4xl">{currentUser?.fullName[0].toUpperCase()}</span>
                 </div>
@@ -56,15 +65,9 @@ const ProfilePage = () => {
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
                 <User className="w-4 h-4" />
-                Your ID
+                Full Name
               </div>
               <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{currentUser?.fullName}</p>
-            </div>
-            <div className="space-y-1.5">
-              <div className="text-sm text-zinc-400 flex items-center gap-2">
-                <User2 className="w-4 h-4" />
-              </div>
-              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{currentUser?.id}</p>
             </div>
 
             <div className="space-y-1.5">
@@ -89,8 +92,12 @@ const ProfilePage = () => {
               </div>
             </div>
             <div className="actions flex justify-end gap-3">
-              <button className="btn ">Cancle</button>
-              <button className="btn btn-primary">{isLoading ? "Saving..." : "Save"}</button>
+              <button type="button" className="btn " onClick={handleReset}>
+                Cancle
+              </button>
+              <button type="submit" className="btn btn-primary" onClick={handleSubmit}>
+                {isLoading ? "Saving..." : "Save"}
+              </button>
             </div>
           </div>
         </div>

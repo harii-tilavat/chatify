@@ -11,7 +11,7 @@ const Avatar: React.FC<AvtarProps> = ({ user, className }) => {
     <div>
       {user.profile && <img src={user.profile} alt="Profile" className={clsx(`size-12 rounded-full object-cover`, className)} />}
       {!user.profile && (
-        <div className={clsx("size-12 bg-primary/20 rounded-full flex items-center justify-center", className)}>
+        <div className={clsx("size-12 bg-primary/30 rounded-full flex items-center justify-center", className)}>
           <span className="text-base">{user.fullName[0].toUpperCase()}</span>
         </div>
       )}

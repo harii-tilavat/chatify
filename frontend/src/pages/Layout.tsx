@@ -14,7 +14,7 @@ const Layout = () => {
     <main>
       <Navbar />
       <div className="main-content">
-        <div className="main-container h-screen">
+        <div className="main-container min-h-screen bg-base-200">
           <Outlet />
         </div>
       </div>

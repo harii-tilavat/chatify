@@ -5,7 +5,7 @@ const { StatusCode, Message } = require("../utils/response");
 const { UserModel } = require("../models/user.model");
 const JwtHelpwer = require("../utils/jwtHelper");
 const AuthRepo = require("../repositories/auth.repo");
-
+const FileUploader = require("../utils/uploader");
 class AuthService {
     constructor() {
         // Initialize the repository for handling DB queries.
@@ -48,6 +48,15 @@ class AuthService {
                 token,
                 user: new UserModel(currentUser)
             }
+        } catch (error) {
+            throw error;
+        }
+    }
+    async updateProfile(userId, file) {
+        try {
+            if (!file) throw new AppError(StatusCode.BAD_REQUEST, "File is required!");
+            const profileUrl = await FileUploader.uploadStream(file.buffer);
+            return new UserModel(await this.authRepo.updateProfile(userId, profileUrl));
         } catch (error) {
             throw error;
         }

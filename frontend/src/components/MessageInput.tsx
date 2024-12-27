@@ -3,10 +3,12 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from
 import { convertToBase64 } from "../utils/helpers";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { toast } from "react-toastify";
+import ImagePreview from "./ImagePreview";
+let typingTimeout: number | null = null; // Declare timeout variable
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
@@ -56,13 +58,13 @@ const MessageInput = () => {
       const maxFileSize = 10 * 1024 * 1024; // 10 MB
 
       if (!validImageTypes.includes(currentFile.type)) {
-        toast.error("Only image files (JPEG, PNG, GIF, WebP) are allowed.");
-        return;
+        // toast.error("Only image files (JPEG, PNG, GIF, WebP) are allowed.");
+        // return;
       }
 
       if (currentFile.size > maxFileSize) {
-        toast.error("File size must be less than or equal to 10 MB. Your size is " + (currentFile.size / 1024 / 1024).toFixed(2) + " MB");
-        return;
+        // toast.error("File size must be less than or equal to 10 MB. Your size is " + (currentFile.size / 1024 / 1024).toFixed(2) + " MB");
+        // return;
       }
       const base64Image = await convertToBase64(currentFile);
       setImagePreview(base64Image);
@@ -70,25 +72,15 @@ const MessageInput = () => {
     }
   }
   function handleInputChange(value: string) {
-    // if (value !== "") {
-    //   if (!isTyping) {
-    //     setIsTyping(true);
-    //     emitTypingStatus(true); // Emit typing status as true when typing starts
-    //   }
-    //   clearTimeout(typingTimeout);
-    //   typingTimeout = setTimeout(() => {
-    //     setIsTyping(false);
-    //     emitTypingStatus(true); // Emit typing status as false after a delay
-    //   }, typingDelay);
-    // } else {
-    //   clearTimeout(typingTimeout);
-    //   if (isTyping) {
-    //     setIsTyping(false);
-    //     emitTypingStatus(false); // Emit typing status as false if input is cleared
-    //   }
-    // }
-
-    emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
+    if (value.length === 1) emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
+    // Clear any existing timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    // Start a new timeout
+    typingTimeout = setTimeout(() => {
+      emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
+    }, 500);
 
     setText(value);
   }
@@ -104,7 +96,7 @@ const MessageInput = () => {
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
-            <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-lg border border-zinc-700" />
+            <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-lg border border-zinc-700 cursor-pointer" onClick={() => setIsPreviewOpen(true)} />
             <button
               onClick={removeImage}
               className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
@@ -118,7 +110,7 @@ const MessageInput = () => {
       )}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-        <div className="flex-1 flex gap-2">
+        <div className="flex-1 flex gap-2 items-center">
           <input type="text" className="w-full input input-bordered rounded-lg input-sm sm:input-md" placeholder="Type a message..." value={text} onChange={(e) => handleInputChange(e.target.value)} />
           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
 
@@ -132,10 +124,12 @@ const MessageInput = () => {
           </button>
         </div>
         <button type="submit" className="btn btn-sm btn-circle" disabled={!text.trim() && !imagePreview}>
-          {isMessageSending && <Loader2 size={22} className="animate-spin" />}
-          {!isMessageSending && <Send size={22} />}
+          {isMessageSending && <Loader2 size={20} className="animate-spin" />}
+          {!isMessageSending && <Send size={20} />}
         </button>
       </form>
+      {/* Image Preview Modal */}
+      {isPreviewOpen && <ImagePreview image={imagePreview} onClose={() => setIsPreviewOpen(false)} />}
     </div>
   );
 };

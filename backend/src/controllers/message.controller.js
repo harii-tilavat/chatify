@@ -25,8 +25,6 @@ class MessageController {
             const { userId } = req.user;
             const updatedMessage = await messageService.sendMessage(userId, id, text, req.file);
             return Response.created(res, Message.CREATED, updatedMessage);
-            // const { message } = res.body;
-            // const socketId = getSocketId()
         } catch (error) {
             next(error);
         }
@@ -39,8 +37,8 @@ class MessageController {
             if (!id) throw new AppError(StatusCode.BAD_REQUEST, Message.REQUIRED_FIELDS_MISSING);
 
             const messages = await messageService.getMessages(userId, id);
+            return Response.success(res, Message.SUCCESS, messages);
             setTimeout(() => {
-                return Response.success(res, Message.SUCCESS, messages);
             }, 1000);
 
         } catch (error) {

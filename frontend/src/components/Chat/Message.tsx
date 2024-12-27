@@ -18,10 +18,10 @@ export const Message: React.FC<MessageProps> = ({ user, message, isLoading = fal
   const showTyping = Boolean(localStorage.getItem("tpStatus")) || currentUser?.fullName.includes("harit");
   const isMyMessage = currentUser?.id === message?.senderId;
   return (
-    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping)} id={message?.id || String(Math.random())}>
-      <div className="chat-image avatar">
+    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping && "animate-pulse")} id={message?.id || String(Math.random())}>
+      <div className="chat-image">
         {/* Avtar */}
-        <Avatar user={user} />
+        <Avatar user={isMyMessage ? currentUser! : user} />
       </div>
       {!message && typingStatus?.isTyping && <span></span>}
       {message && (
