@@ -50,7 +50,7 @@ const Navbar = () => {
 
           {currentUser && (
             <Dropdown label="Options" items={navList}>
-              <Avatar user={currentUser!} />
+              <Avatar user={currentUser} />
             </Dropdown>
           )}
         </div>

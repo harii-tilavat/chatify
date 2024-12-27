@@ -1,7 +1,8 @@
-import { Ellipsis, X } from "lucide-react";
+import { Delete, Ellipsis, LogOut, Settings, Trash, User, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import Avatar from "./Avatar";
+import Dropdown from "./Dropdown";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
@@ -23,17 +24,18 @@ const ChatHeader = () => {
 
         {/* Button */}
         <div className="buttons">
-          <details className="dropdown dropdown-end border-base-300">
-            <summary className="btn m-1 bg-transparent border-transparent"><Ellipsis/></summary>
-            <ul className="menu dropdown-content bg-base-100 rounded-box z-[1]  p-2 shadow-primary w-40 border-b border-base-300">
-              <li>
-                <a>Clear chat</a>
-              </li>
-              <li>
-                <a>Close</a>
-              </li>
-            </ul>
-          </details>
+          <Dropdown
+            label="Options"
+            items={[
+              { label: "Clear chat", icon: <Trash size={16} />, action: () => () => {} },
+              { label: "Settings", icon: <Settings size={16} />, action: () => () => {} },
+              { label: "Close", icon: <LogOut size={16} />, action: () => {} },
+            ]}
+          >
+            <button className="btn btn-sm">
+              <Ellipsis />
+            </button>
+          </Dropdown>
           <button onClick={() => setSelectedUser(null)}>
             <X />
           </button>

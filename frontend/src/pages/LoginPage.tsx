@@ -27,8 +27,11 @@ const LoginPage = () => {
   function handleSubmitForm(user: LoginFormValues) {
     login(user);
   }
+  function handleGoogleSignIn() {
+    alert("Google...");
+  }
   return (
-    <div className="grid lg:grid-cols-2 h-full">
+    <div className="grid lg:grid-cols-2 h-full min-h-screen">
       {/* Left Side - Form */}
       <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} isAnimated />
 
@@ -45,6 +48,14 @@ const LoginPage = () => {
               <p className="text-base-content/60">Sign in to your account</p>
             </div>
           </div>
+
+          {/* Google Sign-In */}
+          <button type="button" onClick={handleGoogleSignIn} className="input input-bordered w-full flex items-center gap-2 justify-center">
+            <img src="/google.svg" alt="Google Icon" className="size-6"/>
+            Sign in with Google
+          </button>
+
+          <div className="divider">OR</div>
 
           {/* Form */}
           <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">
