@@ -1,4 +1,5 @@
 const prisma = require("../config/prismaClient");
+const { DBError } = require("../middlewares/error-handler.midllerware");
 
 class AuthRepo {
     async register(user) {
@@ -14,7 +15,7 @@ class AuthRepo {
             });
             return newUser;
         } catch (error) {
-            throw error;
+            throw new DBError(error);
         }
     }
     async findUserByEmail(email) {
@@ -23,7 +24,14 @@ class AuthRepo {
             const user = await prisma.user.findFirst({ where: { email } });
             return user;
         } catch (error) {
-            throw error;
+            throw new DBError(error);
+        }
+    }
+    async updateProfile(userId, profile) {
+        try {
+            return await prisma.user.update({ data: { profile }, where: { id: userId } });
+        } catch (error) {
+            throw new DBError(error);
         }
     }
 }

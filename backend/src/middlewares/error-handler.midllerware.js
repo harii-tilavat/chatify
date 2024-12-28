@@ -9,7 +9,11 @@ class AppError extends Error {
         this.message = message || "Something went wrong!";
     }
 }
-
+class DBError extends AppError {
+constructor(message) {
+        this.message = message || "Db ERROR";
+    }
+}
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     let { statusCode, message, errors } = err;
@@ -35,4 +39,4 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         errorCode: err.code || undefined
     });
 };
-module.exports = { AppError, errorHandlerMiddleware };
+module.exports = { AppError, DBError, errorHandlerMiddleware };

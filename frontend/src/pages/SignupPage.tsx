@@ -29,7 +29,7 @@ const SignupPage = () => {
     }
   }
   return (
-    <div className="grid lg:grid-cols-2">
+    <div className="grid lg:grid-cols-2 h-full min-h-screen">
       {/* Left Side - Form */}
       <AuthImagePattern title={"Welcome back!"} subtitle={"Sign in to continue your conversations and catch up with your messages."} />
 

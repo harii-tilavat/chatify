@@ -14,11 +14,33 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  fullName  String
-  email     String @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  profile   String?
+  id               String    @id @default(uuid())
+  fullName         String
+  email            String    @unique
+  password         String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  profile          String?
+  sentMessages     Message[] @relation("Sender")
+  receivedMessages Message[] @relation("Reveiver")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String // Sender's user ID
+  receiverId String // Receiver's user ID
+  text       String?
+  image      String?
+  isRead     Boolean? @default(false) // Message read status
+  isDeleted  Boolean? @default(false) // Soft delete
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  sender   User @relation("Sender", fields: [senderId], references: [id])
+  receiver User @relation("Reveiver", fields: [receiverId], references: [id])
+
+  // Index for optimized queries
+  @@index([senderId, receiverId])
+  @@map("messages") // Maps to 'messages' table in the database
 }
