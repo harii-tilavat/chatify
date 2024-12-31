@@ -1,4 +1,4 @@
-import { Delete, Ellipsis, LogOut, Settings, Trash, User, X } from "lucide-react";
+import { Ellipsis, LogOut, Settings, Trash, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import Avatar from "./Avatar";

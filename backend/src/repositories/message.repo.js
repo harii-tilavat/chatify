@@ -33,7 +33,7 @@ class MessageRepo {
                         { senderId: receiverId, receiverId: senderId }
                     ]
                 },
-                orderBy: { createdAt: 'asc' }
+                orderBy: { createdAt: 'asc' },
             })
         } catch (error) {
             throw new DBError(error);
