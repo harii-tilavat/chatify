@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import Modal from "../components/Modal";
+import { useThemeStore } from "../store/useThemeStore";
 
 interface ModalOptions {
   id?: string;
@@ -30,7 +31,7 @@ export const useModal = () => {
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modalOptions, setModalOptions] = useState<ModalOptions | null>(null);
   const [isOpen, setIsOpen] = useState(false); // State to control modal visibility
-
+  const { theme } = useThemeStore();
   const openModal = (options: ModalOptions) => {
     setModalOptions(options);
     setIsOpen(true); // Open the modal by setting state
@@ -43,8 +44,10 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal, modalOptions }}>
-      {children}
-      {isOpen && <Modal />}
+      <div className="root-container" data-theme={theme}>
+        {children}
+        {isOpen && <Modal />}
+      </div>
     </ModalContext.Provider>
   );
 };

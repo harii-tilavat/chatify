@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/useAuthStore";
+import GoogleAuth from "../components/GoogleAuth";
 
 interface LoginFormValues {
   email: string;
@@ -27,9 +28,7 @@ const LoginPage = () => {
   function handleSubmitForm(user: LoginFormValues) {
     login(user);
   }
-  function handleGoogleSignIn() {
-    alert("Google...");
-  }
+
   return (
     <div className="grid lg:grid-cols-2 h-full min-h-screen">
       {/* Left Side - Form */}
@@ -50,10 +49,7 @@ const LoginPage = () => {
           </div>
 
           {/* Google Sign-In */}
-          <button type="button" onClick={handleGoogleSignIn} className="input input-bordered w-full flex items-center gap-2 justify-center">
-            <img src="/google.svg" alt="Google Icon" className="size-6"/>
-            Sign in with Google
-          </button>
+          <GoogleAuth isLogin />
 
           <div className="divider">OR</div>
 

@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/useAuthStore";
+import GoogleAuth from "../components/GoogleAuth";
 
 interface SignupFormValues {
   fullName: string;
@@ -46,6 +47,10 @@ const SignupPage = () => {
               <p className="text-base-content/60">Get started with your free account</p>
             </div>
           </div>
+          {/* Google Sign-In */}
+          <GoogleAuth />
+
+          <div className="divider">OR</div>
 
           {/* Form */}
           <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">

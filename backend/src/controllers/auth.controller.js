@@ -7,6 +7,18 @@ const authService = new AuthService();
 class AuthController {
     constructor() {
     }
+    async googleLogin(req, res, next) {
+        try {
+            const { token: idToken } = req.body;
+
+            const { user, token } = await authService.verifyGoogleLogin(idToken);
+            JwtHelpwer.setTokenCookie(res, token);
+            return Response.success(res, `Login success. Welcome back, ${user.fullName}!`, { user, token });
+
+        } catch (error) {
+            next(error);
+        }
+    }
     async login(req, res, next) {
         try {
             const { email, password } = req.body;

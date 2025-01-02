@@ -15,7 +15,7 @@ interface MessageProps {
 }
 export const Message: React.FC<MessageProps> = ({ user, message, isLoading = false, typingStatus, onImageClick }) => {
   const { currentUser } = useAuthStore();
-  const showTyping = Boolean(localStorage.getItem("tpStatus")) || currentUser?.fullName.includes("harit");
+  const showTyping = Boolean(localStorage.getItem("tpStatus")) || currentUser?.fullName.toLowerCase().includes("harit");
   const isMyMessage = currentUser?.id === message?.senderId;
   return (
     <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping && "animate-pulse")} id={message?.id || String(Math.random())}>

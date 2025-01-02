@@ -10,6 +10,8 @@ const authController = new AuthController();
 // --------------- /api/auth ------------------
 
 
+router.post("/google", authController.googleLogin);
+
 router.post("/login", userLoginValidationSchema, validationHandler, authController.login);
 
 router.post("/register", userRegisterValidationSchema, validationHandler, authController.register);

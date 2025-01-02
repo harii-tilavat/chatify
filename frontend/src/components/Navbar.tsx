@@ -9,17 +9,20 @@ import Dropdown from "./Dropdown";
 const Navbar = () => {
   const { currentUser, logout } = useAuthStore();
   const { openModal } = useModal();
-  const naviagate = useNavigate();
+  const navigate = useNavigate();
   const navList = [
-    { label: "Profile", icon: <User size={16} />, action: () => naviagate("/profile") },
-    { label: "Settings", icon: <Settings size={16} />, action: () => naviagate("/settings") },
+    { label: "Profile", icon: <User size={16} />, action: () => navigate("/profile") },
+    { label: "Settings", icon: <Settings size={16} />, action: () => navigate("/settings") },
     { label: "Logout", icon: <LogOut size={16} />, action: handleLogout },
   ];
   function handleLogout() {
     openModal({
       title: "Logout?",
       description: "Are you sure you want to log out?",
-      onConfirm: logout,
+      onConfirm: async () => {
+        await logout();
+        navigate("/login");
+      },
     });
   }
   return (

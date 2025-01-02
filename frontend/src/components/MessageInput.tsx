@@ -65,7 +65,7 @@ const MessageInput = () => {
         setImagePreview(base64Image);
         setFile(currentFile);
       }
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error?.message || "Invalid file selected.");
     }
   }
