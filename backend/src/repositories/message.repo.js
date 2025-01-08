@@ -45,5 +45,23 @@ class MessageRepo {
             throw new DBError(error);
         }
     }
+    async deleteMessages(userId, messageIds = [], deletedStatus) {
+        try {
+            await prisma.message.updateMany({
+                data: deletedStatus,
+                where: {
+                    id: {
+                        in: messageIds
+                    },
+                    OR: [
+                        { senderId: userId },
+                        { receiverId: userId }
+                    ]
+                }
+            })
+        } catch (error) {
+            throw new DBError(error);
+        }
+    }
 }
 module.exports = MessageRepo;

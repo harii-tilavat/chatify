@@ -38,9 +38,15 @@ class MessageController {
 
             const messages = await messageService.getMessages(userId, id);
             return Response.success(res, Message.SUCCESS, messages);
-            setTimeout(() => {
-            }, 1000);
-
+        } catch (error) {
+            next(error);
+        }
+    }
+    async deleteMessages(req, res, next) {
+        try {
+            const { userId } = req.user;
+            await messageService.deleteMessages(userId, req.body);
+            return Response.success(res, Message.SUCCESS);
         } catch (error) {
             next(error);
         }

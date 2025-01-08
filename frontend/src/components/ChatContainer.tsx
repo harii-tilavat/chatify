@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Message } from "./Chat/Message";
-import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { MessageCircle } from "lucide-react";
 import ImagePreview from "./ImagePreview";
+import ChatHeader from "./ChatHeader";
 const ChatContainer = () => {
   const { selectedUser, setSelectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages, typingStatus } = useChatStore();
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null); // State for the image to preview
+
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser?.id);
@@ -38,7 +39,6 @@ const ChatContainer = () => {
   return (
     <div className="flex-1 flex flex-col overflow-auto h-full">
       <ChatHeader />
-
       <div className="main-chat-container overflow-y-auto relative mb-14" ref={messageContainerRef}>
         {/* Skeliton */}
         {isMessagesLoading && <MessageSkeleton />}
