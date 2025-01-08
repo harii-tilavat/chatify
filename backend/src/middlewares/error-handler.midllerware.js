@@ -10,7 +10,7 @@ class AppError extends Error {
     }
 }
 class DBError extends AppError {
-constructor(message) {
+    constructor(message) {
         this.message = message || "Db ERROR";
     }
 }

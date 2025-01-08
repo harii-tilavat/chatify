@@ -28,9 +28,9 @@ class AuthRepo {
             throw new DBError(error);
         }
     }
-    async updateProfile(userId, profile) {
+    async updateProfile(userId, user) {
         try {
-            return await prisma.user.update({ data: { profile }, where: { id: userId } });
+            return await prisma.user.update({ data: user, where: { id: userId } });
         } catch (error) {
             throw new DBError(error);
         }

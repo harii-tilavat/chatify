@@ -13,6 +13,7 @@ export interface UserModel extends BaseModel {
     fullName: string;
     email: string;
     profile?: string;
+    isActive:boolean;
     createdAt?: string;
     updatedAt?: string;
 }

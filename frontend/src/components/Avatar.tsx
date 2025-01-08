@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { UserModel } from "../models/authModel";
 import clsx from "clsx";
 
@@ -8,17 +8,19 @@ interface AvtarProps {
   profile?: string;
 }
 const Avatar: React.FC<AvtarProps> = ({ user, className }) => {
-  // const [imgSrc, setImgSrc] = useState<string | undefined>(user.profile);
+  const [isImageError, setIsImageError] = useState(false); // Track image error
+
   const handleError = () => {
-    // Set a fallback placeholder image
-    // setImgSrc(undefined);
+    setIsImageError(true); // Set state to true when image fails to load
   };
+  if (!user) return null;
   return (
     <div>
-      {user.profile && <img src={user.profile} alt="Profile" className={clsx(`size-12 rounded-full object-cover`, className)} onError={handleError} />}
-      {!user.profile && (
+      {user.profile && !isImageError ? (
+        <img src={user.profile} alt="Profile" className={clsx(`size-12 rounded-full object-cover`, className)} onError={handleError} />
+      ) : (
         <div className={clsx("size-12 bg-primary/30 rounded-full flex items-center justify-center", className)}>
-          <span>{user.fullName[0].toUpperCase()}</span>
+          <span>{user?.fullName[0].toUpperCase()}</span>
         </div>
       )}
     </div>

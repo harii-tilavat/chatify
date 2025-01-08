@@ -40,8 +40,9 @@ class AuthController {
     }
     async checkAuth(req, res, next) {
         try {
-            const { userId } = req.user;
-            return await Response.success(res, "Authenication success.", userId);
+            const { email } = req.user;
+            const currentUser = await authService.getProfileByEmail(email);
+            return await Response.success(res, "Authenication success.", currentUser);
         } catch (error) {
             next(error);
         }
@@ -49,7 +50,7 @@ class AuthController {
     async updateProfile(req, res, next) {
         try {
             const { userId } = req.user;
-            const updatedUser = await authService.updateProfile(userId, req.file);
+            const updatedUser = await authService.updateProfile(userId, { file: req.file, ...req.body });
             return await Response.success(res, "Profile updated successfully.", updatedUser);
         } catch (error) {
             next(error);

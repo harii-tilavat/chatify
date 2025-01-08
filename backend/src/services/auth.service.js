@@ -98,11 +98,25 @@ class AuthService {
             throw error;
         }
     }
-    async updateProfile(userId, file) {
+    async updateProfile(userId, user) {
         try {
-            if (!file) throw new AppError(StatusCode.BAD_REQUEST, "File is required!");
-            const profileUrl = await FileUploader.uploadStream(file.buffer);
-            return new UserModel(await this.authRepo.updateProfile(userId, profileUrl));
+            const { file = null, isActive } = user;
+            let profile = null;
+            if (file) {
+                profile = await FileUploader.uploadStream(file.buffer)
+            };
+            const newProfile = { isActive: isActive === "true" };
+            if (profile) {
+                newProfile.profile = profile;
+            }
+            return new UserModel(await this.authRepo.updateProfile(userId, newProfile));
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getProfileByEmail(email) {
+        try {
+            return new UserModel(await this.authRepo.findUserByEmail(email));
         } catch (error) {
             throw error;
         }

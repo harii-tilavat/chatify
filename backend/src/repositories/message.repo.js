@@ -5,9 +5,15 @@ class MessageRepo {
         try {
             return prisma.user.findMany({
                 where: {
-                    id: {
-                        not: userId
-                    }
+                    AND: [
+                        {
+                            id: {
+                                not: userId
+                            }
+                        },
+                        { isActive: true }
+                    ]
+
                 }
             })
         } catch (error) {

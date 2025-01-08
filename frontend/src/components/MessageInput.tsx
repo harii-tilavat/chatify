@@ -32,7 +32,17 @@ const MessageInput = () => {
       const formData = new FormData();
       if (text) formData.append("text", text);
       if (file) formData.append("file", file);
+
+      if (!currentUser?.isActive) {
+        toast.error("Please activate your profile first.");
+        return;
+      }
+
       if (socket && selectedUser) {
+        if (!selectedUser.isActive) {
+          toast.error(selectedUser.fullName + " is currently Inactive!");
+          return;
+        }
         await sendMessage(selectedUser.id, formData);
         removeImage();
         setText("");

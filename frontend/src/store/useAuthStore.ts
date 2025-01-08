@@ -31,8 +31,14 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
         try {
             const user = get().currentUser;
             if (user) {
-                await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/check-auth");
-                get().connectSocket();
+                const { data } = await axiosInstance.post<GenericReponseModel<UserModel>>("/auth/check-auth");
+                const currentUser = data.data;
+                if (currentUser) {
+                    set({ currentUser });
+                    if (currentUser.isActive) {
+                        get().connectSocket();
+                    }
+                }
             }
         } catch (error) {
             set({ currentUser: null });
@@ -123,7 +129,10 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
                 headers: { "Content-Type": "multipart/form-data" }
             });
             const { message, data: currentUser } = data;
-            localStorage.setItem("user", JSON.stringify(currentUser?.profile));
+            localStorage.setItem("user", JSON.stringify(currentUser));
+            if (currentUser?.isActive) {
+                get().connectSocket();
+            }
             set({ currentUser });
             toast.success(message || "Profile updated successfully.");
         } catch (error) {

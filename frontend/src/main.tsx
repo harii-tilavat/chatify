@@ -5,11 +5,11 @@ import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { ModalProvider } from "./context/ModalContext.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
+import { GOOGLE_CLIENT_ID } from "./config/googleAuth.ts";
 createRoot(document.getElementById("root")!).render(
-  <StrictMode >
+  <StrictMode>
     <BrowserRouter>
-      <GoogleOAuthProvider clientId="">
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <ModalProvider>
           <App />
         </ModalProvider>
