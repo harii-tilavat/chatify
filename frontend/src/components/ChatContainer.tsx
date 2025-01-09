@@ -25,6 +25,7 @@ const ChatContainer = () => {
     return () => {
       // setSelectedUser(null);
       if (selectedUser) {
+        handleClearSearch();
         unsubscribeToMessages(selectedUser.id);
       }
     };
@@ -56,10 +57,15 @@ const ChatContainer = () => {
     }
     deleteMessages(ids);
   }
-
+  function handleSearchChat(message: string) {
+    console.log("Message: ", message);
+  }
+  function handleClearSearch() {
+    console.log("ALL Cleared!");
+  }
   return (
     <div className="flex-1 flex flex-col overflow-auto h-full">
-      <ChatHeader onOpenModal={() => openDeleteModal(messages.map((i) => i.id))} />
+      <ChatHeader onOpenModal={() => openDeleteModal(messages.map((i) => i.id))} onSearchChat={handleSearchChat} onClearSearch={handleClearSearch} onSearchDown={() => {}} onSearchUp={() => {}} />
 
       <div className="main-chat-container overflow-y-auto relative mb-14" ref={messageContainerRef}>
         {/* Skeliton */}

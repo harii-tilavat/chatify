@@ -15,13 +15,15 @@ interface ChatStoreProps {
     isMessageSending: boolean;
     typingStatus: TypingStatus;
     messages: Array<MessageModel>;
+    filteredMessaged: Array<MessageModel>;
     getUsers: () => void;
     sendMessage: (userId: string, message: FormData) => void;
     getMessages: (userId: string) => void;
     subscribeToMessages: () => void;
     unsubscribeToMessages: (receiverId: string) => void;
-    setSelectedUser: (user: UserModel | null) => void;
     deleteMessages: (messagesIds: Array<string>, deletedStatus?: DeletedStatus) => void;
+    setSelectedUser: (user: UserModel | null) => void;
+    setFilteredMessages: (messages: Array<MessageModel>) => void;
 }
 
 export const useChatStore = create<ChatStoreProps>((set, get) => ({
@@ -31,6 +33,7 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
     isUsersLoading: false,
     isMessagesLoading: false,
     isMessageSending: false,
+    filteredMessaged: [],
     typingStatus: { isTyping: false, senderId: null, receiverId: null, text: "" },
     getUsers: async () => {
         set({ isUsersLoading: true });
@@ -131,5 +134,8 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
     },
     setSelectedUser: async (selectedUser: UserModel | null) => {
         set({ selectedUser });
+    },
+    setFilteredMessages: (messages: Array<MessageModel>) => {
+        set({ filteredMessaged: messages });
     }
 }));
