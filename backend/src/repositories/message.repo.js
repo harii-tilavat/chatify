@@ -37,7 +37,8 @@ class MessageRepo {
                     OR: [
                         { senderId, receiverId },
                         { senderId: receiverId, receiverId: senderId }
-                    ]
+                    ],
+                    isDeletedBySender: false
                 },
                 orderBy: { createdAt: 'asc' },
             })
@@ -48,7 +49,7 @@ class MessageRepo {
     async deleteMessages(userId, messageIds = [], deletedStatus) {
         try {
             await prisma.message.updateMany({
-                data: deletedStatus,
+                data: { ...deletedStatus },
                 where: {
                     id: {
                         in: messageIds

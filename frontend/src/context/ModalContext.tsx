@@ -11,6 +11,7 @@ interface ModalOptions {
   cancelLabel?: string;
 }
 
+
 interface ModalContextProps {
   openModal: (options: ModalOptions) => void;
   closeModal: () => void;

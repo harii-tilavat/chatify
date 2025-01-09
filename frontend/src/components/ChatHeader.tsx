@@ -4,7 +4,10 @@ import { useChatStore } from "../store/useChatStore";
 import Avatar from "./Avatar";
 import Dropdown from "./Dropdown";
 
-const ChatHeader = () => {
+interface ChatHeaderProps {
+  onOpenModal: () => void;
+}
+const ChatHeader: React.FC<ChatHeaderProps> = ({ onOpenModal }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
 
@@ -27,12 +30,12 @@ const ChatHeader = () => {
           <Dropdown
             label="Options"
             items={[
-              { label: "Clear chat", icon: <Trash size={16} />, action: () => () => {} },
+              { label: "Clear chat", icon: <Trash size={16} />, action: onOpenModal },
               { label: "Settings", icon: <Settings size={16} />, action: () => () => {} },
               { label: "Close", icon: <LogOut size={16} />, action: () => {} },
             ]}
           >
-            <button className="btn btn-sm">
+            <button className="me-4">
               <Ellipsis />
             </button>
           </Dropdown>

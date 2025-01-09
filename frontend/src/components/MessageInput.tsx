@@ -7,6 +7,8 @@ import ImagePreview from "./ImagePreview";
 import useDebounce from "../hooks/useDebounce";
 import { checkFileValidation } from "../utils/validators";
 import { toast } from "react-toastify";
+import { useModal } from "../context/ModalContext";
+import { AxiosError } from "axios";
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
@@ -91,6 +93,7 @@ const MessageInput = () => {
       fileInputRef.current.value = "";
     }
   }
+
   return (
     <div className="p-4 w-full absolute bottom-0">
       {imagePreview && (

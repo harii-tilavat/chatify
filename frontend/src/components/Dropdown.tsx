@@ -25,7 +25,7 @@ const Dropdown: React.FC<DropdownProps> = ({ items, className, children }) => {
       <div
         tabIndex={0}
         role="button"
-        className="m-1"
+        className=""
         onClick={toggleDropdown}
         onBlur={() => setTimeout(() => setIsOpen(false), 150)} // Delay to prevent immediate close
       >
@@ -34,7 +34,7 @@ const Dropdown: React.FC<DropdownProps> = ({ items, className, children }) => {
 
       {/* Dropdown Items */}
       {isOpen && (
-        <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+        <ul className="dropdown-content menu bg-base-100 rounded-box z-[1000] w-52 p-2 shadow">
           {items.map((item, index) => (
             <li key={index}>
               <a onClick={() => handleItemClick(item.action)} className="flex items-center">

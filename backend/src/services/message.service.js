@@ -42,7 +42,7 @@ class MessageService {
         try {
             const { messageIds = [], isDeletedBySender, isDeletedByReceiver } = body;
             const newStatus = {};
-
+            
             // Set the flags in the newStatus object based on the request
             if (isDeletedBySender) {
                 newStatus.isDeletedBySender = true;

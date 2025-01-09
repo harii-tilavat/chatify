@@ -3,7 +3,7 @@ import { UserModel } from "../models/authModel";
 import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
-import { MessageModel, TypingStatus } from "../models/messageModel";
+import { DeletedStatus, MessageModel, TypingStatus } from "../models/messageModel";
 import { useAuthStore } from "./useAuthStore";
 import { toast } from "react-toastify";
 
@@ -21,6 +21,7 @@ interface ChatStoreProps {
     subscribeToMessages: () => void;
     unsubscribeToMessages: (receiverId: string) => void;
     setSelectedUser: (user: UserModel | null) => void;
+    deleteMessages: (messagesIds: Array<string>, deletedStatus?: DeletedStatus) => void;
 }
 
 export const useChatStore = create<ChatStoreProps>((set, get) => ({
@@ -107,6 +108,21 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
             const { data } = await axiosInstance.get<GenericReponseModel<Array<MessageModel>>>("/messages/" + userId);
             const messages = data.data;
             set({ messages });
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            set({ isMessagesLoading: false });
+        }
+    },
+    deleteMessages: async (messageIds: Array<string> = [], deletedStatus: DeletedStatus = { isDeletedBySender: true }) => {
+        set({ isMessagesLoading: true });
+        try {
+            await axiosInstance.delete<GenericReponseModel<Array<MessageModel>>>("/messages/delete", { data: { ...deletedStatus, messageIds } });
+            const updatedMessages = get().messages.filter(i => !messageIds.includes(i.id));
+            set({ messages: updatedMessages });
+            if (messageIds.length > 1) {
+                toast.success("Messages deleted successfully!");
+            }
         } catch (error) {
             handleApiError(error);
         } finally {
