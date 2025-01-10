@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Message } from "./Chat/Message";
 import MessageInput from "./MessageInput";
@@ -8,15 +8,16 @@ import ImagePreview from "./ImagePreview";
 import ChatHeader from "./ChatHeader";
 import { useModal } from "../context/ModalContext";
 import { toast } from "react-toastify";
+
 const ChatContainer = () => {
-  const { selectedUser, setSelectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages, typingStatus } = useChatStore();
-  console.log("isMessagesLoading: ", isMessagesLoading);
+  const { selectedUser, setSelectedUser, messages, isMessagesLoading, getMessages, subscribeToMessages, unsubscribeToMessages, typingStatus, setFilteredMessages } = useChatStore();
   const messageContainerRef = useRef<HTMLDivElement>(null);
+  const prevElementRef = useRef<HTMLDivElement | null>(null);
+  const selectedTimeoutRef = useRef<number>(0);
   const [previewImage, setPreviewImage] = useState<string | null>(null); // State for the image to preview
 
   const { openModal } = useModal();
   const { deleteMessages } = useChatStore();
-
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser?.id);
@@ -57,17 +58,44 @@ const ChatContainer = () => {
     }
     deleteMessages(ids);
   }
-  function handleSearchChat(message: string) {
-    console.log("Message: ", message);
-  }
+  const handleSearchChat = useCallback(
+    (message: string) => {
+      const filtered = messages.filter((i) => i.text && i.text.toLowerCase().includes(message.toLowerCase()));
+      setFilteredMessages(filtered);
+      console.log("Filtered : ", filtered);
+    },
+    [messages, setFilteredMessages]
+  );
+
   function handleClearSearch() {
     console.log("ALL Cleared!");
   }
+  function scrollById(id: string) {
+    const scrollElement = document.getElementById(id) as HTMLDivElement;
+    if (scrollElement) {
+      scrollElement.scrollIntoView({ behavior: "smooth" });
+
+      if (selectedTimeoutRef.current && prevElementRef.current) {
+        prevElementRef.current.classList.remove("bg-yellow-400/10");
+        prevElementRef.current.classList.remove("animate-pulse");
+        clearTimeout(selectedTimeoutRef.current);
+      }
+      // Add a "searched" class or style to mark the element
+      scrollElement.classList.add("bg-yellow-400/10");
+      scrollElement.classList.add("animate-pulse");
+      prevElementRef.current = scrollElement;
+      // Optionally, remove the "searched" class after some time
+      selectedTimeoutRef.current = setTimeout(() => {
+        scrollElement.classList.remove("bg-yellow-400/10");
+        scrollElement.classList.remove("animate-pulse");
+      }, 4000); // Adjust the timeout duration as needed
+    }
+  }
   return (
     <div className="flex-1 flex flex-col overflow-auto h-full">
-      <ChatHeader onOpenModal={() => openDeleteModal(messages.map((i) => i.id))} onSearchChat={handleSearchChat} onClearSearch={handleClearSearch} onSearchDown={() => {}} onSearchUp={() => {}} />
+      <ChatHeader onOpenModal={() => openDeleteModal(messages.map((i) => i.id))} onSearchChat={handleSearchChat} onClearSearch={handleClearSearch} onGoToChat={(id) => scrollById(id)} />
 
-      <div className="main-chat-container overflow-y-auto relative mb-14" ref={messageContainerRef}>
+      <div className="main-chat-container overflow-y-auto relative mb-14 " ref={messageContainerRef}>
         {/* Skeliton */}
         {isMessagesLoading && <MessageSkeleton />}
 

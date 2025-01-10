@@ -10,13 +10,13 @@ interface ChatHeaderProps {
   onOpenModal: () => void;
   onSearchChat: (message: string) => void;
   onClearSearch: () => void;
-  onSearchUp: () => void;
-  onSearchDown: () => void;
+  onGoToChat: (id: string) => void;
 }
-const ChatHeader: React.FC<ChatHeaderProps> = ({ onOpenModal, onSearchChat, onClearSearch, onSearchUp, onSearchDown }) => {
-  const { selectedUser, setSelectedUser } = useChatStore();
+const ChatHeader: React.FC<ChatHeaderProps> = ({ onOpenModal, onSearchChat, onClearSearch, onGoToChat }) => {
+  const { selectedUser, setSelectedUser, filteredMessages } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(filteredMessages.length - 1);
 
   const debouncedSearch = useDebounce(searchQuery, 400);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,11 +33,31 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onOpenModal, onSearchChat, onCl
 
   useEffect(() => {
     setSearchQuery("");
+    setCurrentIndex(0);
   }, [selectedUser]);
 
+  useEffect(() => {
+    setCurrentIndex(filteredMessages.length - 1);
+  }, [filteredMessages]);
+  
   function handleClearSearch() {
     setSearchQuery("");
     onClearSearch();
+  }
+  function handleSearchUp() {
+    setCurrentIndex((prevIndex) => {
+      const newIndex = Math.max(prevIndex - 1, 0); // Clamp index to 0 (upper bound)
+      onGoToChat(filteredMessages[newIndex]?.id); // Navigate to the new chat
+      return newIndex;
+    });
+  }
+
+  function handleSearchDown() {
+    setCurrentIndex((prevIndex) => {
+      const newIndex = Math.min(prevIndex + 1, filteredMessages.length - 1); // Clamp index to length-1
+      onGoToChat(filteredMessages[newIndex]?.id); // Navigate to the new chat
+      return newIndex;
+    });
   }
   return (
     <div className="p-2.5 border-b border-base-300 relative">
@@ -64,12 +84,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onOpenModal, onSearchChat, onCl
             )}
           </div>
           {/* Search Navigation Buttons */}
-          {searchQuery && (
+          {filteredMessages.length > 0 && searchQuery && (
             <div className=" transform flex ">
-              <button onClick={onSearchUp} className="btn btn-circle btn-xs btn-ghost hover:bg-base-300" title="Search up">
+              <button onClick={handleSearchUp} className="btn btn-circle btn-xs btn-ghost hover:bg-base-300" title="Search up" disabled={currentIndex === -1}>
                 <ChevronUp size={16} />
               </button>
-              <button onClick={onSearchDown} className="btn btn-circle btn-xs btn-ghost hover:bg-base-300" title="Search down">
+              <button onClick={handleSearchDown} className="btn btn-circle btn-xs btn-ghost hover:bg-base-300" title="Search down" disabled={currentIndex === filteredMessages.length - 1}>
                 <ChevronDown size={16} />
               </button>
             </div>

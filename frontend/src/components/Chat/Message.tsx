@@ -22,7 +22,7 @@ export const Message: React.FC<MessageProps> = ({ user, message, isLoading = fal
   const isMyMessage = currentUser?.id === message?.senderId;
 
   return (
-    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping && "animate-pulse")} id={message?.id || String(Math.random())}>
+    <div className={clsx("chat", isMyMessage || isLoading ? "chat-end" : "chat-start", typingStatus?.isTyping && "animate-pulse", "rounded-lg")} id={message?.id || String(Math.random())}>
       <div className="chat-image">
         {/* Avtar */}
         <Avatar user={isMyMessage ? currentUser! : user} />
