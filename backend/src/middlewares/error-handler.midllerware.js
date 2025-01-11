@@ -10,8 +10,10 @@ class AppError extends Error {
     }
 }
 class DBError extends AppError {
-constructor(message) {
+    constructor(message) {
+        console.log(message);
         this.message = message || "Db ERROR";
+        super(StatusCode.INTERNAL_SERVER_ERROR, this.message);
     }
 }
 

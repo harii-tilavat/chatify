@@ -5,9 +5,15 @@ class MessageRepo {
         try {
             return prisma.user.findMany({
                 where: {
-                    id: {
-                        not: userId
-                    }
+                    AND: [
+                        {
+                            id: {
+                                not: userId
+                            }
+                        },
+                        { isActive: true }
+                    ]
+
                 }
             })
         } catch (error) {
@@ -31,9 +37,28 @@ class MessageRepo {
                     OR: [
                         { senderId, receiverId },
                         { senderId: receiverId, receiverId: senderId }
-                    ]
+                    ],
+                    isDeletedBySender: false
                 },
-                orderBy: { createdAt: 'asc' }
+                orderBy: { createdAt: 'asc' },
+            })
+        } catch (error) {
+            throw new DBError(error);
+        }
+    }
+    async deleteMessages(userId, messageIds = [], deletedStatus) {
+        try {
+            await prisma.message.updateMany({
+                data: { ...deletedStatus },
+                where: {
+                    id: {
+                        in: messageIds
+                    },
+                    OR: [
+                        { senderId: userId },
+                        { receiverId: userId }
+                    ]
+                }
             })
         } catch (error) {
             throw new DBError(error);

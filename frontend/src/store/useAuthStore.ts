@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { initilizeSocket } from "../lib/socket";
 import { Socket } from "socket.io-client";
 import { useChatStore } from "./useChatStore";
+import { googleLogout } from '@react-oauth/google';
 interface AuthStoreProps {
     isLoading: boolean;
     currentUser: UserModel | null;
@@ -18,6 +19,7 @@ interface AuthStoreProps {
     updateProfile: (formData: FormData) => void;
     logout: () => void;
     connectSocket: () => void;
+    googleLogin: (token: string) => void;
 }
 
 export const useAuthStore = create<AuthStoreProps>((set, get) => ({
@@ -29,14 +31,38 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
         try {
             const user = get().currentUser;
             if (user) {
-                await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/check-auth");
-                get().connectSocket();
+                const { data } = await axiosInstance.post<GenericReponseModel<UserModel>>("/auth/check-auth");
+                const currentUser = data.data;
+                if (currentUser) {
+                    set({ currentUser });
+                    if (currentUser.isActive) {
+                        get().connectSocket();
+                    }
+                }
             }
         } catch (error) {
             set({ currentUser: null });
             localStorage.removeItem("user");
             handleApiError(error);
             throw error;
+        }
+    },
+    // Handle Google Login
+    googleLogin: async (token: string) => {
+        set({ isLoading: true });
+        try {
+            const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/google", { token });
+            const { message, data: userData } = data;
+            if (userData && userData.user) {
+                set({ currentUser: userData.user });
+                localStorage.setItem("user", JSON.stringify(userData.user));
+                toast.success(message || "Login success.");
+                get().connectSocket();
+            }
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            set({ isLoading: false });
         }
     },
     // Handle user Login
@@ -46,10 +72,12 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             const { email, password } = user;
             const { data } = await axiosInstance.post<GenericReponseModel<LoginResponseModel>>("/auth/login", { email, password });
             const { message, data: userData } = data;
-            set({ currentUser: userData?.user, });
-            localStorage.setItem("user", JSON.stringify(userData?.user));
-            toast.success(message || "Login success.");
-            get().connectSocket();
+            if (userData && userData.user) {
+                set({ currentUser: userData.user, });
+                localStorage.setItem("user", JSON.stringify(userData.user));
+                toast.success(message || "Login success.");
+                get().connectSocket();
+            }
         } catch (error) {
             handleApiError(error);
             throw error;
@@ -86,6 +114,8 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
             if (currentSocket) {
                 currentSocket.disconnect();
             }
+            // Clear Google login session
+            googleLogout();
         } catch (error) {
             handleApiError(error);
         } finally {
@@ -99,7 +129,10 @@ export const useAuthStore = create<AuthStoreProps>((set, get) => ({
                 headers: { "Content-Type": "multipart/form-data" }
             });
             const { message, data: currentUser } = data;
-            localStorage.setItem("user", JSON.stringify(currentUser?.profile));
+            localStorage.setItem("user", JSON.stringify(currentUser));
+            if (currentUser?.isActive) {
+                get().connectSocket();
+            }
             set({ currentUser });
             toast.success(message || "Profile updated successfully.");
         } catch (error) {

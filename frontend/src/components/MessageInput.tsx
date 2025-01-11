@@ -4,7 +4,11 @@ import { convertToBase64 } from "../utils/helpers";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ImagePreview from "./ImagePreview";
-let typingTimeout: number | null = null; // Declare timeout variable
+import useDebounce from "../hooks/useDebounce";
+import { checkFileValidation } from "../utils/validators";
+import { toast } from "react-toastify";
+import { useModal } from "../context/ModalContext";
+import { AxiosError } from "axios";
 
 const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState("");
@@ -12,6 +16,7 @@ const MessageInput = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
+  const debouncedText = useDebounce(text, 300);
 
   const { socket } = useAuthStore();
   const { selectedUser, sendMessage, isMessageSending } = useChatStore();
@@ -29,7 +34,17 @@ const MessageInput = () => {
       const formData = new FormData();
       if (text) formData.append("text", text);
       if (file) formData.append("file", file);
+
+      if (!currentUser?.isActive) {
+        toast.error("Please activate your profile first.");
+        return;
+      }
+
       if (socket && selectedUser) {
+        if (!selectedUser.isActive) {
+          toast.error(selectedUser.fullName + " is currently Inactive!");
+          return;
+        }
         await sendMessage(selectedUser.id, formData);
         removeImage();
         setText("");
@@ -49,38 +64,25 @@ const MessageInput = () => {
     },
     [currentUser, selectedUser, socket]
   );
+  useEffect(() => {
+    emitTypingStatus(debouncedText !== "", debouncedText);
+  }, [debouncedText, emitTypingStatus]);
 
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
-    const currentFile = e.target.files?.length ? e.target.files[0] : null;
-    if (currentFile) {
-      // Validation: Check if file is an image and size is <= 10 MB
-      const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-      const maxFileSize = 10 * 1024 * 1024; // 10 MB
-
-      if (!validImageTypes.includes(currentFile.type)) {
-        // toast.error("Only image files (JPEG, PNG, GIF, WebP) are allowed.");
-        // return;
+    try {
+      const currentFile = e.target.files?.length ? e.target.files[0] : null;
+      if (currentFile) {
+        checkFileValidation(currentFile);
+        const base64Image = await convertToBase64(currentFile);
+        setImagePreview(base64Image);
+        setFile(currentFile);
       }
-
-      if (currentFile.size > maxFileSize) {
-        // toast.error("File size must be less than or equal to 10 MB. Your size is " + (currentFile.size / 1024 / 1024).toFixed(2) + " MB");
-        // return;
-      }
-      const base64Image = await convertToBase64(currentFile);
-      setImagePreview(base64Image);
-      setFile(currentFile);
+    } catch (error: any) {
+      toast.error(error?.message || "Invalid file selected.");
     }
   }
   function handleInputChange(value: string) {
-    if (value.length === 1) emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
-    // Clear any existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-    // Start a new timeout
-    typingTimeout = setTimeout(() => {
-      emitTypingStatus(value !== "", value); // Emit typing status as true when typing starts
-    }, 500);
+    if (value.length === 1) emitTypingStatus(true, value); // Emit typing status as true when typing starts
 
     setText(value);
   }
@@ -91,6 +93,7 @@ const MessageInput = () => {
       fileInputRef.current.value = "";
     }
   }
+
   return (
     <div className="p-4 w-full absolute bottom-0">
       {imagePreview && (

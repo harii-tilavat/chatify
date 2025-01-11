@@ -4,13 +4,14 @@ const { DBError } = require("../middlewares/error-handler.midllerware");
 class AuthRepo {
     async register(user) {
         try {
-            const { fullName, email, password } = user;
+            const { fullName, email, password, profile = null } = user;
             // Create a new user record in the database.
             const newUser = await prisma.user.create({
                 data: {
                     fullName,
                     password,
-                    email
+                    email,
+                    profile
                 }
             });
             return newUser;
@@ -27,9 +28,9 @@ class AuthRepo {
             throw new DBError(error);
         }
     }
-    async updateProfile(userId, profile) {
+    async updateProfile(userId, user) {
         try {
-            return await prisma.user.update({ data: { profile }, where: { id: userId } });
+            return await prisma.user.update({ data: user, where: { id: userId } });
         } catch (error) {
             throw new DBError(error);
         }

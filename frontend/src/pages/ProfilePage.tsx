@@ -2,10 +2,11 @@ import { ChangeEvent, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
 import { convertToBase64, formateDate } from "../utils/helpers";
-
+import Avatar from "../components/Avatar";
 const ProfilePage = () => {
   const { currentUser, isLoading, updateProfile } = useAuthStore();
   const [fileContent, setFileContent] = useState<{ preview: string; file: File | undefined | null }>({ file: null, preview: "" });
+  const [isActive, setIsActive] = useState(currentUser?.isActive || false);
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
@@ -16,15 +17,20 @@ const ProfilePage = () => {
     // await updateProfile({ profilePic: base64Image });
   };
   const handleSubmit = () => {
+    const formData = new FormData();
     if (fileContent.file && fileContent.preview) {
-      const formData = new FormData();
       formData.append("file", fileContent.file);
-      updateProfile(formData);
     }
+    formData.append("isActive", String(isActive));
+    updateProfile(formData);
+  };
+  const handleStatusChange = () => {
+    setIsActive((prevStatus) => !prevStatus);
   };
   const handleReset = () => {
     setFileContent({ file: null, preview: "" });
   };
+  if (!currentUser) return null;
   return (
     <div className="pt-20">
       <div className="max-w-2xl mx-auto p-4 py-8">
@@ -38,12 +44,9 @@ const ProfilePage = () => {
 
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <img src={fileContent.preview || currentUser?.profile} alt="Profile" className={`size-32 rounded-full object-cover border-4 ${!fileContent.preview && !currentUser?.profile && "hidden"}`} />
-              {!fileContent.preview && !currentUser?.profile && (
-                <div className="size-32 bg-primary/20 rounded-full flex items-center justify-center">
-                  <span className="text-4xl">{currentUser?.fullName[0].toUpperCase()}</span>
-                </div>
-              )}
+              {currentUser && !fileContent.preview && <Avatar user={currentUser} className="size-32 border-4 text-xl" />}
+              {currentUser && fileContent.preview && <Avatar user={{...currentUser,profile:fileContent.preview}} className="size-32 border-4 text-xl" profile={fileContent.preview} />}
+
               <label
                 htmlFor="avatar-upload"
                 className={`
@@ -81,16 +84,30 @@ const ProfilePage = () => {
 
           <div className="mt-6 bg-base-300 rounded-xl p-6 flex flex-col gap-4">
             <h2 className="text-lg font-medium ">Account Information</h2>
-            <div className="space-y-3 text-sm">
+            <section className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
                 <span>{formateDate(currentUser?.createdAt || "")}</span>
               </div>
+
+              <div className="flex items-center justify-between py-2 border-b border-zinc-700">
+                <span className="label-text">Show notifications</span>
+                <input type="checkbox" className="toggle toggle-primary" defaultChecked aria-label="Show notifications" />
+              </div>
+            </section>
+
+            <section className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
-                <span className="text-green-500">Active</span>
+                <span className={currentUser.isActive ? "text-green-500" : "text-red-500"}>{currentUser.isActive ? "Active" : "Inactive"}</span>
               </div>
-            </div>
+
+              <div className="flex items-center justify-between py-2">
+                <span className="label-text">Activate Account</span>
+                <input type="checkbox" className="toggle toggle-primary" checked={isActive} onChange={handleStatusChange} />
+              </div>
+            </section>
+
             <div className="actions flex justify-end gap-3">
               <button type="button" className="btn " onClick={handleReset}>
                 Cancle

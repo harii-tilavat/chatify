@@ -6,6 +6,7 @@ class UserModel {
         this.createdAt = user.createdAt;
         this.updateddAt = user.updatedAt;
         this.profile = user.profile;
+        this.isActive = user.isActive;
     }
 }
 module.exports = { UserModel };

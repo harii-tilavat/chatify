@@ -3,7 +3,7 @@ import { UserModel } from "../models/authModel";
 import axiosInstance from "../lib/axios";
 import { handleApiError } from "../utils/api";
 import { GenericReponseModel } from "../models";
-import { MessageModel, TypingStatus } from "../models/messageModel";
+import { DeletedStatus, MessageModel, TypingStatus } from "../models/messageModel";
 import { useAuthStore } from "./useAuthStore";
 import { toast } from "react-toastify";
 
@@ -15,12 +15,15 @@ interface ChatStoreProps {
     isMessageSending: boolean;
     typingStatus: TypingStatus;
     messages: Array<MessageModel>;
+    filteredMessages: Array<MessageModel>;
     getUsers: () => void;
     sendMessage: (userId: string, message: FormData) => void;
     getMessages: (userId: string) => void;
     subscribeToMessages: () => void;
     unsubscribeToMessages: (receiverId: string) => void;
+    deleteMessages: (messagesIds: Array<string>, deletedStatus?: DeletedStatus) => void;
     setSelectedUser: (user: UserModel | null) => void;
+    setFilteredMessages: (messages: Array<MessageModel>) => void;
 }
 
 export const useChatStore = create<ChatStoreProps>((set, get) => ({
@@ -30,6 +33,7 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
     isUsersLoading: false,
     isMessagesLoading: false,
     isMessageSending: false,
+    filteredMessages: [],
     typingStatus: { isTyping: false, senderId: null, receiverId: null, text: "" },
     getUsers: async () => {
         set({ isUsersLoading: true });
@@ -113,7 +117,25 @@ export const useChatStore = create<ChatStoreProps>((set, get) => ({
             set({ isMessagesLoading: false });
         }
     },
+    deleteMessages: async (messageIds: Array<string> = [], deletedStatus: DeletedStatus = { isDeletedBySender: true }) => {
+        set({ isMessagesLoading: true });
+        try {
+            await axiosInstance.delete<GenericReponseModel<Array<MessageModel>>>("/messages/delete", { data: { ...deletedStatus, messageIds } });
+            const updatedMessages = get().messages.filter(i => !messageIds.includes(i.id));
+            set({ messages: updatedMessages });
+            if (messageIds.length > 1) {
+                toast.success("Messages deleted successfully!");
+            }
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            set({ isMessagesLoading: false });
+        }
+    },
     setSelectedUser: async (selectedUser: UserModel | null) => {
         set({ selectedUser });
+    },
+    setFilteredMessages: (messages: Array<MessageModel> = []) => {
+        set({ filteredMessages: messages });
     }
 }));

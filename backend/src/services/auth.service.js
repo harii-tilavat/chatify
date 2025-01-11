@@ -6,10 +6,50 @@ const { UserModel } = require("../models/user.model");
 const JwtHelpwer = require("../utils/jwtHelper");
 const AuthRepo = require("../repositories/auth.repo");
 const FileUploader = require("../utils/uploader");
+const client = require("../config/google.config");
 class AuthService {
     constructor() {
         // Initialize the repository for handling DB queries.
         this.authRepo = new AuthRepo();
+    }
+    async verifyGoogleLogin(token) {
+        // Verify the Google token
+        try {
+            // Validate token
+            if (!token) throw new AppError(StatusCode.UNAUTHORIZED, Message.TOKEN_MISSING);
+
+            const tickit = await client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID // Your Google Client ID
+            });
+            const payload = tickit.getPayload();
+            if (!payload) {
+                throw new AppError(StatusCode.UNAUTHORIZED, "Invalid token payload.");
+            }
+
+            // Check if user exists in DB
+            let currentUser = await this.authRepo.findUserByEmail(payload.email);
+
+            if (!currentUser) {
+                const newUser = {
+                    fullName: payload.name,
+                    profile: payload.picture,
+                    password: "google-oauth",
+                    email: payload.email
+                }
+                currentUser = await this.authRepo.register(newUser);
+                if (!currentUser.profile) {
+                    currentUser.profile = newUser.profile;
+                }
+            }
+            // Generate the JWT token
+            const jwtToken = JwtHelpwer.generateToken({ id: currentUser.id, email: currentUser.email });
+
+            return { user: new UserModel(currentUser), token: jwtToken };
+        } catch (error) {
+            console.error("Error during Google login:", error);
+            throw new AppError(StatusCode.UNAUTHORIZED, "Google login failed.");
+        }
     }
     async registerUser(user) {
         try {
@@ -23,7 +63,13 @@ class AuthService {
 
             // Register the user in the database.
             await this.authRepo.register(currentUser);
-            return await this.loginUser(user.email, user.password);
+
+            // Generate the JWT token
+            const token = JwtHelpwer.generateToken({ id: currentUser.id, email: currentUser.email });
+            return {
+                token,
+                user: new UserModel(currentUser)
+            }
         } catch (error) {
             throw error;
         }
@@ -52,11 +98,25 @@ class AuthService {
             throw error;
         }
     }
-    async updateProfile(userId, file) {
+    async updateProfile(userId, user) {
         try {
-            if (!file) throw new AppError(StatusCode.BAD_REQUEST, "File is required!");
-            const profileUrl = await FileUploader.uploadStream(file.buffer);
-            return new UserModel(await this.authRepo.updateProfile(userId, profileUrl));
+            const { file = null, isActive } = user;
+            let profile = null;
+            if (file) {
+                profile = await FileUploader.uploadStream(file.buffer)
+            };
+            const newProfile = { isActive: isActive === "true" };
+            if (profile) {
+                newProfile.profile = profile;
+            }
+            return new UserModel(await this.authRepo.updateProfile(userId, newProfile));
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getProfileByEmail(email) {
+        try {
+            return new UserModel(await this.authRepo.findUserByEmail(email));
         } catch (error) {
             throw error;
         }

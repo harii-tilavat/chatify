@@ -6,7 +6,7 @@ const Modal: React.FC = () => {
 
   if (!modalOptions) return null;
 
-  const {  title, description, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm } = modalOptions;
+  const { title, description, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm } = modalOptions;
 
   return (
     <div className="modal modal-open">

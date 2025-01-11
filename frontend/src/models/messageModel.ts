@@ -13,3 +13,7 @@ export interface TypingStatus {
     isTyping: boolean;
     text: string;
 }
+export interface DeletedStatus {
+    isDeletedBySender?: boolean;
+    isDeletedByReceiver?: boolean;
+}

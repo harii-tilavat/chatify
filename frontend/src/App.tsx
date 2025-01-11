@@ -2,12 +2,10 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
 import "./App.css";
 import AppRouter from "./routes/AppRouter";
-import { useThemeStore } from "./store/useThemeStore";
-function App() {
-  const { theme } = useThemeStore();
 
+function App() {
   return (
-    <div className="app" data-theme={theme}>
+    <div className="app">
       {/* Main routing */}
       <AppRouter />
 
