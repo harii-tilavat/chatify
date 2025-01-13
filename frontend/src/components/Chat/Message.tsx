@@ -35,22 +35,22 @@ export const Message: React.FC<MessageProps> = ({ user, message, isLoading = fal
           </div>
           <div className="chat-bubble flex flex-col">
             {/* If there is an image  */}
-            <div className="chat-col">
+            <div className="chat-col relative group  duration-300 flex items-center">
               {message.image && <img src={message.image} alt="Attachment" className="sm:max-w-[200px] rounded-md my-2 cursor-pointer" onClick={() => onImageClick && onImageClick(message.image)!} />}
 
               {/* If there is text  */}
               {message.text && (
-                <div className={clsx("flex gap-2", isMyMessage && "flex-row-reverse", "relative group  duration-300")}>
+                <div className={clsx("flex gap-2", isMyMessage && "flex-row-reverse", "")}>
                   <span>{message.text}</span>
                   {/* <div className="drop-down"> */}
-                  {!typingStatus?.isTyping && (
-                    <Dropdown items={[{ label: "Delete message", icon: <Trash size={16} />, action: () => onOpenModal && onOpenModal([message.id]) }]} label="Open" className={clsx("", !isMyMessage && "dropdown-bottom")}>
-                      <EllipsisIcon className="cursor-pointer opacity-0 group-hover:opacity-100 w-0 group-hover:w-10 transition-all duration-300" />
-                    </Dropdown>
-                  )}
 
                   {/* </div> */}
                 </div>
+              )}
+              {!typingStatus?.isTyping && (
+                <Dropdown items={[{ label: "Delete message", icon: <Trash size={16} />, action: () => onOpenModal && onOpenModal([message.id]) }]} label="Open" className={clsx("", !isMyMessage && "dropdown-bottom")}>
+                  <EllipsisIcon className="cursor-pointer opacity-0 group-hover:opacity-100 w-0 group-hover:w-10 transition-all duration-300" />
+                </Dropdown>
               )}
             </div>
           </div>

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useChatStore } from "../store/useChatStore";
-import { Message } from "./Chat/Message";
-import MessageInput from "./MessageInput";
-import MessageSkeleton from "./skeletons/MessageSkeleton";
+import { useChatStore } from "../../store/useChatStore";
+import { Message } from "./Message";
+import MessageInput from "../MessageInput";
+import MessageSkeleton from "../skeletons/MessageSkeleton";
 import { MessageCircle } from "lucide-react";
-import ImagePreview from "./ImagePreview";
+import ImagePreview from "../ImagePreview";
 import ChatHeader from "./ChatHeader";
-import { useModal } from "../context/ModalContext";
+import { useModal } from "../../context/ModalContext";
 import { toast } from "react-toastify";
 
 const ChatContainer = () => {
@@ -61,8 +61,10 @@ const ChatContainer = () => {
   const handleSearchChat = useCallback(
     (message: string) => {
       const filtered = messages.filter((i) => i.text && i.text.toLowerCase().includes(message.toLowerCase()));
+      if (filtered.length === 1) {
+        scrollById(filtered[0].id);
+      }
       setFilteredMessages(filtered);
-      console.log("Filtered : ", filtered);
     },
     [messages, setFilteredMessages]
   );
